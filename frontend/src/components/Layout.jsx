@@ -9,22 +9,16 @@ export default function Layout({
   title,
   subtitle,
   showDateRange,
-  onExport,
-  showGovtBanner
+  onExport
 }) {
   const [mobileOpen, setMobileOpen] = useState(false);
-
-  // Show official government header banner for Admin role first (or if explicitly enabled)
-  const isGovtBannerActive = showGovtBanner !== undefined 
-    ? showGovtBanner 
-    : user?.role === "Project Administrator";
 
   return (
     <div className="flex h-full bg-[#FAF7F4]">
       <Sidebar user={user} mobileOpen={mobileOpen} onClose={() => setMobileOpen(false)} />
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
         {/* Official Top Government Banner (Left: MoSPI Emblem, Right: PAIMANA Logo) */}
-        {isGovtBannerActive && <GovtHeaderBanner />}
+        <GovtHeaderBanner />
 
         {/* Standard Inner Header */}
         <Header
