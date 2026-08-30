@@ -6,23 +6,23 @@ const initialChatHistory = [
   {
     id: 1,
     role: "ai",
-    content: "Greetings! I am the **MoSPI PAIMANA Intelligence Copilot**. I analyze real-time project risk data, cost overruns, milestone lags, and SHAP factor attributions across 1,981 central infrastructure projects. How can I assist your review today?",
+    content: "Greetings! I am the **MoSPI PAIMANA Intelligence Copilot**. I analyze real-time project risk data, cost overruns, milestone lags, and SHAP factor attributions across **2,092 central infrastructure projects** in 17 Ministries. How can I assist your review today?",
     timestamp: "10:00 AM"
   }
 ];
 
 const suggestedPrompts = [
-  "Give me an executive summary of April 2026 MoSPI report",
-  "Which projects in Road Transport have >20% cost overrun?",
-  "Show delayed projects in Maharashtra with risk score",
-  "What are the top 3 bottleneck drivers for NHAI projects?",
-  "Which ministry has the best on-time completion record?"
+  "Give me an executive summary of MoSPI portfolio",
+  "Which projects in Civil Aviation or Highways have high risk?",
+  "Show delayed projects in Gujarat or Maharashtra with risk score",
+  "What are the top 3 bottleneck drivers for infrastructure projects?",
+  "Which sector has the best on-time completion record?"
 ];
 
 const mockResponses = {
-  "give me an executive summary of april 2026 mospi report": "### 📊 MoSPI April 2026 Infrastructure Executive Summary:\n\n• **Total Monitored Projects:** 1,981 projects (₹150 Cr+)\n• **Original Approved Cost:** ₹37.13 Lakh Crore\n• **Latest Revised Cost:** ₹42.78 Lakh Crore (Overall cost overrun: **+15.2%**)\n• **Cumulative Expenditure:** ₹20.36 Lakh Crore (47.6% of revised cost)\n• **Delayed Projects:** 320 projects (16.2% of portfolio)\n• **High Risk Flagged:** 245 projects requiring immediate inter-ministerial intervention.\n\n**Top Escalation Sectors:** Road Transport & Highways, Railways, and Water & Sanitation.",
+  "give me an executive summary of mospi portfolio": "### 📊 MoSPI Infrastructure Portfolio Executive Summary:\n\n• **Total Monitored Projects:** 2,092 projects (₹150 Cr+)\n• **Latest Revised Cost:** ₹43.28 Lakh Crore (Overall portfolio budget)\n• **Critical & High Risk Flagged:** Over 400 projects requiring immediate inter-ministerial intervention.\n• **Key Sectors Tracked:** Civil Aviation, Road Transport & Highways, Railways, Petroleum & Natural Gas, Power.\n\n**Top Focus Areas:** Faster Right of Way (RoW) clearances, forest approvals, and vendor cashflow monitoring.",
   
-  "which projects in road transport have >20% cost overrun?": "In **Ministry of Road Transport & Highways**, the following projects exceed 20% cost escalation:\n\n1. **NH-48 Highway Expansion (Gujarat)** — Approved: ₹2,400 Cr | Revised: ₹2,640 Cr (+10% currently, predicted +24% overrun)\n2. **Varanasi-Ranchi-Kolkata Expressway (Package 4)** — Approved: ₹3,200 Cr | Revised: ₹3,920 Cr (**+22.5%**)\n3. **Delhi Ring Road Bypass Elevated Corridor** — Approved: ₹1,450 Cr | Revised: ₹1,820 Cr (**+25.5%**)\n\n*Primary causes:* Land compensation escalation and delayed statutory tree-cutting permits.",
+  "which projects in civil aviation or highways have high risk?": "In **Civil Aviation & Road Transport**, key high-risk projects flagged include:\n\n1. **Guwahati Airport New Integrated Terminal Building (Assam)** — Approved: ₹1,712 Cr | Revised: ₹2,520 Cr (**Critical Overrun**)\n2. **Construction of New Domestic Terminal Building at Rajahmundry (AP)** — Physical progress 86% | **High Risk**\n3. **New Integrated Terminal Building (AP - ID: 701107)** — Approved: ₹612 Cr | **High Risk**\n\n*Primary causes:* Environmental clearance lags and revised structural terminal expansions.",
 
   "show delayed projects in maharashtra with risk score": "There are **4 major delayed projects** in **Maharashtra**:\n\n1. **Mumbai Coastal Road (North Segment)** — 48% physical progress | Risk Score: **78/100 (High)**\n2. **Smart City Pune Metro Phase 2** — 55% physical progress | Risk Score: **53/100 (Medium)**\n3. **Nagpur-Vijayawada Freight Rail Connector** — 62% physical progress | Risk Score: **64/100 (High)**\n4. **Nashik Bulk Water Pipeline** — 38% physical progress | Risk Score: **42/100 (Medium)**",
 

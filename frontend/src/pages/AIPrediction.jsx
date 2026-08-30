@@ -17,7 +17,7 @@ import { apiService } from "../services/api";
 export default function AIPrediction({ user }) {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("existing"); // 'existing' | 'cuf_simulator'
-  const [selectedId, setSelectedId] = useState("1");
+  const [selectedId, setSelectedId] = useState(projects[0]?.id || "701107");
   const [animated, setAnimated] = useState(false);
 
   // CUF Form state
@@ -30,7 +30,7 @@ export default function AIPrediction({ user }) {
   const [cufEvaluating, setCufEvaluating] = useState(false);
   const [cufResult, setCufResult] = useState(null);
 
-  const project = projects.find(p => p.id === parseInt(selectedId)) || projects[0];
+  const project = projects.find(p => String(p.id) === String(selectedId)) || projects[0];
 
   useEffect(() => {
     setAnimated(false);
@@ -38,12 +38,12 @@ export default function AIPrediction({ user }) {
     return () => clearTimeout(t);
   }, [selectedId]);
 
-  const costProb = project.costRisk;
-  const timeProb = project.timeRisk;
-  const overallScore = project.overallRisk;
-  const riskLabel = overallScore >= 75 ? "HIGH RISK" : overallScore >= 50 ? "MEDIUM RISK" : "LOW RISK";
-  const riskColor = overallScore >= 75 ? "text-red-600" : overallScore >= 50 ? "text-amber-600" : "text-green-600";
-  const riskBg = overallScore >= 75 ? "bg-red-50 border-red-200" : overallScore >= 50 ? "bg-amber-50 border-amber-200" : "bg-green-50 border-green-200";
+  const costProb = project.costRisk || (project.costRevisionPct ? Math.min(95, Math.round(project.costRevisionPct * 1.4 + 25)) : (project.riskLevel === 'Critical' ? 88 : project.riskLevel === 'High' ? 68 : 28));
+  const timeProb = project.timeRisk || (project.deadlineRevisionFlag ? 85 : (project.riskLevel === 'Critical' ? 92 : project.riskLevel === 'High' ? 74 : 32));
+  const overallScore = project.riskScore || project.overallRisk || (project.riskLevel === 'Critical' ? 89 : project.riskLevel === 'High' ? 65 : 25);
+  const riskLabel = overallScore >= 75 ? "CRITICAL RISK" : overallScore >= 50 ? "HIGH RISK" : overallScore >= 35 ? "MEDIUM RISK" : "LOW RISK";
+  const riskColor = overallScore >= 75 ? "text-red-600" : overallScore >= 50 ? "text-orange-600" : overallScore >= 35 ? "text-amber-600" : "text-green-600";
+  const riskBg = overallScore >= 75 ? "bg-red-50 border-red-200" : overallScore >= 50 ? "bg-orange-50 border-orange-200" : overallScore >= 35 ? "bg-amber-50 border-amber-200" : "bg-green-50 border-green-200";
 
   const shapData = shapFactors.filter(f => f.direction === "positive").map(f => ({
     ...f,

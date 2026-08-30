@@ -28,7 +28,7 @@ export default function Reports({ user }) {
           format: "PDF",
           icon: FileText,
           color: "green",
-          desc: "Registry of all new project proposals approved and onboarded into the national 1,981 portfolio.",
+          desc: "Registry of all new project proposals approved and onboarded into the national 2,092 portfolio.",
         },
       ];
     }
@@ -70,7 +70,7 @@ export default function Reports({ user }) {
         format: "PDF (Govt Standard)",
         icon: FileText,
         color: "orange",
-        desc: "Official monthly infrastructure monitoring report for ₹150 Cr+ Central Sector Projects covering 1,981 projects.",
+        desc: "Official monthly infrastructure monitoring report for ₹150 Cr+ Central Sector Projects covering 2,092 projects.",
       },
       {
         id: 2,

@@ -1,4 +1,4 @@
-import { Bell, Settings, Search, Menu, Calendar, Download, Shield } from "lucide-react";
+import { Menu, Calendar, Download } from "lucide-react";
 
 export default function Header({ user, title, subtitle, onMenuClick, showDateRange = false, onExport }) {
   return (
@@ -23,44 +23,26 @@ export default function Header({ user, title, subtitle, onMenuClick, showDateRan
           </div>
         </div>
 
-        {/* Right: actions */}
-        <div className="flex items-center gap-2.5 flex-shrink-0">
-          <div className="hidden md:flex items-center gap-2 bg-[#F5F5F4] rounded-xl px-3 py-1.5 border border-[#E7E5E4]">
-            <Search size={13} className="text-[#A8A29E]" />
-            <input
-              type="text"
-              placeholder="Search project, ministry..."
-              className="bg-transparent text-xs outline-none text-[#1C1917] placeholder:text-[#A8A29E] w-36 lg:w-44"
-            />
+        {/* Right: contextual actions if present */}
+        {(showDateRange || onExport) && (
+          <div className="flex items-center gap-2.5 flex-shrink-0">
+            {showDateRange && (
+              <button className="hidden lg:flex items-center gap-1.5 text-xs font-semibold text-[#44403C] bg-[#F5F5F4] hover:bg-[#E7E5E4] border border-[#E7E5E4] px-3 py-1.5 rounded-xl transition-colors">
+                <Calendar size={13} />
+                Apr 2026 Cycle
+              </button>
+            )}
+
+            {onExport && (
+              <button
+                onClick={onExport}
+                className="hidden sm:flex items-center gap-1.5 text-xs font-semibold text-white bg-[#1C1917] hover:bg-[#44403C] px-3.5 py-1.5 rounded-xl transition-colors shadow-2xs cursor-pointer"
+              >
+                <Download size={13} /> Export Report
+              </button>
+            )}
           </div>
-
-          {showDateRange && (
-            <button className="hidden lg:flex items-center gap-1.5 text-xs font-semibold text-[#44403C] bg-[#F5F5F4] hover:bg-[#E7E5E4] border border-[#E7E5E4] px-3 py-1.5 rounded-xl transition-colors">
-              <Calendar size={13} />
-              Apr 2026 Cycle
-            </button>
-          )}
-
-          {onExport && (
-            <button
-              onClick={onExport}
-              className="hidden sm:flex items-center gap-1.5 text-xs font-semibold text-white bg-[#1C1917] hover:bg-[#44403C] px-3.5 py-1.5 rounded-xl transition-colors shadow-2xs cursor-pointer"
-            >
-              <Download size={13} /> Export Report
-            </button>
-          )}
-
-          <button className="relative p-2 rounded-xl hover:bg-[#F5F5F4] transition-colors border border-[#E7E5E4] cursor-pointer">
-            <Bell size={15} className="text-[#78716C]" />
-            <span className="absolute top-1 right-1 w-2 h-2 bg-[#E8602A] rounded-full" />
-          </button>
-
-          <div className="flex items-center gap-2 pl-1 border-l border-[#E7E5E4]">
-            <div className="w-8 h-8 rounded-xl bg-[#E8602A] text-white text-xs font-black flex items-center justify-center shadow-2xs">
-              {user?.avatar || "U"}
-            </div>
-          </div>
-        </div>
+        )}
       </div>
     </header>
   );

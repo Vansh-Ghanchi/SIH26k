@@ -53,15 +53,15 @@ export default function Projects({ user }) {
     <Layout
       user={user}
       title="Monitored Projects Repository"
-      subtitle="Comprehensive PAIMANA portfolio tracking 1,981 central infrastructure projects across 22 sectors."
+      subtitle={`Comprehensive PAIMANA portfolio tracking ${projects.length.toLocaleString('en-IN')} central infrastructure projects across 17 ministries & 14 sectors.`}
     >
       {/* View Switcher & Counter */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
         <div className="flex items-center gap-2">
           <span className="text-xs font-bold text-[#1C1917] bg-white border border-[#E7E5E4] px-3 py-1.5 rounded-xl shadow-xs">
-            {filtered.length} Projects Filtered
+            {filtered.length.toLocaleString('en-IN')} Projects Filtered
           </span>
-          <span className="text-xs text-[#78716C]">Total Portfolio: 1,981 Projects (₹42.78L Cr)</span>
+          <span className="text-xs text-[#78716C]">Total Portfolio: {projects.length.toLocaleString('en-IN')} Projects (₹43.28L Cr)</span>
         </div>
 
         <div className="flex items-center gap-1.5 p-1 bg-[#F5F5F4] rounded-xl border border-[#E7E5E4]">
@@ -99,7 +99,7 @@ export default function Projects({ user }) {
                 <input
                   value={search}
                   onChange={e => { setSearch(e.target.value); setPage(1); }}
-                  placeholder="Search project name..."
+                  placeholder="Search project name or ID..."
                   className="w-full pl-9 pr-3 py-2 bg-[#FAF7F4] border border-[#E7E5E4] rounded-xl text-xs outline-none focus:border-[#E8602A] text-[#1C1917]"
                 />
               </div>
@@ -107,7 +107,7 @@ export default function Projects({ user }) {
               <select
                 value={ministry}
                 onChange={handleFilterChange(setMinistry)}
-                className="text-xs bg-[#FAF7F4] border border-[#E7E5E4] rounded-xl px-3 py-2 outline-none focus:border-[#E8602A] text-[#44403C]"
+                className="text-xs bg-[#FAF7F4] border border-[#E7E5E4] rounded-xl px-3 py-2 outline-none focus:border-[#E8602A] text-[#44403C] max-w-48"
               >
                 {ministries.map(m => (
                   <option key={m} value={m}>{m === "All" ? "All Ministries" : m}</option>
@@ -166,38 +166,38 @@ export default function Projects({ user }) {
                       className="hover:bg-[#FAF7F4]/70 transition-colors cursor-pointer"
                     >
                       <td className="py-3.5 pl-4">
-                        <p className="font-bold text-[#1C1917] hover:text-[#E8602A] transition-colors">{p.name}</p>
+                        <p className="font-bold text-[#1C1917] hover:text-[#E8602A] transition-colors line-clamp-1">{p.name}</p>
                         <p className="text-[11px] text-[#A8A29E] flex items-center gap-1 mt-0.5">
-                          <MapPin size={11} /> {p.state} · ID: PRJ-{p.id.toString().padStart(4, "0")}
+                          <MapPin size={11} /> {p.state} · ID: {p.projectId || p.id}
                         </p>
                       </td>
                       <td className="py-3.5 px-3">
-                        <p className="font-medium text-[#44403C]">{p.ministry}</p>
+                        <p className="font-medium text-[#44403C] line-clamp-1">{p.ministry}</p>
                         <p className="text-[11px] text-[#A8A29E]">{p.sector}</p>
                       </td>
                       <td className="py-3.5 px-3 font-mono font-medium text-[#1C1917]">
-                        <p>₹{p.approvedCost} Cr</p>
-                        {p.revisedCost && p.revisedCost > p.approvedCost && (
-                          <p className="text-[10px] text-red-600 font-bold">Rev: ₹{p.revisedCost} Cr</p>
-                        )}
+                        <p>₹{(p.originalCostCr || p.costValue || 0).toLocaleString('en-IN')} Cr</p>
+                        {p.revisedCostCr && p.revisedCostCr > (p.originalCostCr || p.costValue) ? (
+                          <p className="text-[10px] text-red-600 font-bold">Rev: ₹{p.revisedCostCr.toLocaleString('en-IN')} Cr</p>
+                        ) : null}
                       </td>
                       <td className="py-3.5 px-3 min-w-32">
                         <div className="flex justify-between text-[11px] font-semibold text-[#1C1917] mb-1">
                           <span>Progress</span>
-                          <span>{p.physicalProgress}%</span>
+                          <span>{p.physicalProgress || p.progress}%</span>
                         </div>
                         <ProgressBar
-                          value={p.physicalProgress}
-                          color={p.physicalProgress >= 70 ? "success" : p.physicalProgress >= 40 ? "warning" : "danger"}
+                          value={p.physicalProgress || p.progress}
+                          color={(p.physicalProgress || p.progress) >= 70 ? "success" : (p.physicalProgress || p.progress) >= 40 ? "warning" : "danger"}
                           height="h-1.5"
                           animate
                         />
                       </td>
                       <td className="py-3.5 px-3">
-                        <RiskBadge level={p.riskLevel} score={p.overallRisk} />
+                        <RiskBadge level={p.riskLevel} score={p.riskScore || p.overallRisk} />
                       </td>
                       <td className="py-3.5 pr-4 text-right">
-                        <span className="text-xs font-bold text-[#E8602A] hover:underline">
+                        <span className="text-xs font-bold text-[#E8602A] hover:underline whitespace-nowrap">
                           View Analysis →
                         </span>
                       </td>
