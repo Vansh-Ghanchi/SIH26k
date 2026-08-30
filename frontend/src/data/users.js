@@ -4,26 +4,29 @@ export const users = [
     email: "officer@infrawatch.gov.in",
     password: "Officer@123",
     role: "Government Officer",
-    name: "Rajesh Kumar",
+    name: "Dr. Rajesh Kumar (IAS)",
     avatar: "RK",
-    department: "Ministry of Road Transport",
+    department: "Ministry of Road Transport & Highways (NHAI)",
+    agency: "National Highways Authority of India"
   },
   {
     id: 2,
+    email: "reviewer@infrawatch.gov.in",
+    password: "Reviewer@123",
+    role: "Reviewer / Monitoring Officer",
+    name: "Ananya Deshmukh",
+    avatar: "AD",
+    department: "MoSPI Nodal Verification & Monitoring Division",
+    agency: "Inter-Ministerial Project Review Wing"
+  },
+  {
+    id: 3,
     email: "admin@infrawatch.gov.in",
     password: "Admin@123",
     role: "Project Administrator",
     name: "Amit Sharma",
     avatar: "AS",
-    department: "Infrastructure Division",
-  },
-  {
-    id: 3,
-    email: "analyst@infrawatch.gov.in",
-    password: "Analyst@123",
-    role: "Analyst",
-    name: "Priya Patel",
-    avatar: "PP",
-    department: "Risk & Analytics Cell",
+    department: "PAIMANA Data Informatics & Innovation Division (DIID)",
+    agency: "National Infrastructure Portal Administration"
   },
 ];

@@ -1,40 +1,70 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Bot, User, Sparkles } from "lucide-react";
+import { Send, Bot, User, Sparkles, HelpCircle, Terminal, CheckCircle2 } from "lucide-react";
 import Layout from "../components/Layout";
-import { chatHistory, suggestedQuestions } from "../data/analytics";
+
+const initialChatHistory = [
+  {
+    id: 1,
+    role: "ai",
+    content: "Greetings! I am the **MoSPI PAIMANA Intelligence Copilot**. I analyze real-time project risk data, cost overruns, milestone lags, and SHAP factor attributions across 1,981 central infrastructure projects. How can I assist your review today?",
+    timestamp: "10:00 AM"
+  }
+];
+
+const suggestedPrompts = [
+  "Give me an executive summary of April 2026 MoSPI report",
+  "Which projects in Road Transport have >20% cost overrun?",
+  "Show delayed projects in Maharashtra with risk score",
+  "What are the top 3 bottleneck drivers for NHAI projects?",
+  "Which ministry has the best on-time completion record?"
+];
 
 const mockResponses = {
-  "compare transport projects in gujarat": "In Gujarat, there are currently **3 major Transport projects** under monitoring:\n\n1. **NH-48 Highway Expansion** — Risk: 89/100 (Critical)\n2. **Delhi-Ahmedabad Expressway** — Risk: 45/100 (Medium)\n3. **GIFT City Metro** — Risk: 28/100 (Low)\n\nNH-48 is the highest-risk project and warrants immediate attention.",
-  "show all delayed projects in maharashtra": "There are **4 delayed projects** in Maharashtra:\n\n1. Smart City Pune Phase 2 — 55% complete\n2. Mumbai Coastal Road — 48% complete\n3. Nagpur Metro Extension — 62% complete\n4. Nashik Water Supply — 38% complete\n\nSmart City Pune has the highest risk score at 53/100.",
-  "what is the average risk score for energy sector": "The **Energy sector** currently has an average risk score of **44/100 (Medium)**.\n\n• Best performing: Rajasthan Solar Power Grid (42/100)\n• Worst performing: Kochi-Bangalore Transmission (58/100)\n• On-time rate: 68% — above the cross-sector average of 58%",
-  "which ministry has the best on-time record": "Based on current data, the **Ministry of Education** has the best on-time record:\n\n• On-time rate: 79%\n• Average risk score: 33/100\n• Avg. completion time: 12% faster than industry average\n\nJal Shakti follows closely with a 62% on-time rate for rural water schemes.",
+  "give me an executive summary of april 2026 mospi report": "### 📊 MoSPI April 2026 Infrastructure Executive Summary:\n\n• **Total Monitored Projects:** 1,981 projects (₹150 Cr+)\n• **Original Approved Cost:** ₹37.13 Lakh Crore\n• **Latest Revised Cost:** ₹42.78 Lakh Crore (Overall cost overrun: **+15.2%**)\n• **Cumulative Expenditure:** ₹20.36 Lakh Crore (47.6% of revised cost)\n• **Delayed Projects:** 320 projects (16.2% of portfolio)\n• **High Risk Flagged:** 245 projects requiring immediate inter-ministerial intervention.\n\n**Top Escalation Sectors:** Road Transport & Highways, Railways, and Water & Sanitation.",
+  
+  "which projects in road transport have >20% cost overrun?": "In **Ministry of Road Transport & Highways**, the following projects exceed 20% cost escalation:\n\n1. **NH-48 Highway Expansion (Gujarat)** — Approved: ₹2,400 Cr | Revised: ₹2,640 Cr (+10% currently, predicted +24% overrun)\n2. **Varanasi-Ranchi-Kolkata Expressway (Package 4)** — Approved: ₹3,200 Cr | Revised: ₹3,920 Cr (**+22.5%**)\n3. **Delhi Ring Road Bypass Elevated Corridor** — Approved: ₹1,450 Cr | Revised: ₹1,820 Cr (**+25.5%**)\n\n*Primary causes:* Land compensation escalation and delayed statutory tree-cutting permits.",
+
+  "show delayed projects in maharashtra with risk score": "There are **4 major delayed projects** in **Maharashtra**:\n\n1. **Mumbai Coastal Road (North Segment)** — 48% physical progress | Risk Score: **78/100 (High)**\n2. **Smart City Pune Metro Phase 2** — 55% physical progress | Risk Score: **53/100 (Medium)**\n3. **Nagpur-Vijayawada Freight Rail Connector** — 62% physical progress | Risk Score: **64/100 (High)**\n4. **Nashik Bulk Water Pipeline** — 38% physical progress | Risk Score: **42/100 (Medium)**",
+
+  "what are the top 3 bottleneck drivers for nhai projects?": "Based on **SHAP Feature Attribution analysis** on NHAI project data:\n\n1. 🌳 **Forest & Environmental Clearances (34.2% attribution):** Delayed state-level wildlife and eco-sensitive zone approvals.\n2. 🚜 **Land Acquisition Handover Lag (28.4% attribution):** Stagnation in district land arbitration and encumbrance-free site handover.\n3. 🏗️ **Contractor Cash-flow & Material Escalation (18.6% attribution):** Steel/bitumen index surges causing milestone slowdowns.",
+
+  "which ministry has the best on-time completion record?": "The **Ministry of Education** and **Ministry of Health** lead the on-time performance ranking:\n\n• **Ministry of Education:** 79% On-time completion rate | Avg. Risk Score: **33/100 (Low)**\n• **Ministry of Health (AIIMS Infrastructure):** 74% On-time rate | Avg. Risk Score: **41/100**\n• **Ministry of Jal Shakti:** 62% On-time rate with notable speedup in Jal Jeevan rural pipelines."
 };
 
 function getResponse(question) {
-  const q = question.toLowerCase();
+  const q = question.toLowerCase().trim();
   for (const [key, val] of Object.entries(mockResponses)) {
-    if (q.includes(key.split(" ")[0]) && q.includes(key.split(" ").slice(-1)[0])) return val;
+    if (q.includes(key) || key.includes(q)) return val;
   }
-  if (q.includes("budget") || q.includes("cost") || q.includes("overrun")) {
-    return "Based on current financial trends, **NH-48 Highway Expansion** (84%), **Kaleshwaram Lift Irrigation** (79%), and **AIIMS Darbhanga** (72%) have the highest probability of exceeding budget. All three are recommended for immediate financial review.";
+  if (q.includes("summary") || q.includes("overview") || q.includes("report")) {
+    return mockResponses["give me an executive summary of april 2026 mospi report"];
   }
-  if (q.includes("nh-48") || q.includes("highway")) {
-    return "NH-48 is classified as **HIGH RISK** (89/100) due to:\n\n• Physical progress 32% behind schedule\n• 3 missed consecutive milestones\n• 2 cost revisions totaling ₹240 Cr\n• Contractor performance issues\n\nAI recommends immediate site inspection and ministry escalation.";
+  if (q.includes("cost") || q.includes("overrun") || q.includes("budget")) {
+    return mockResponses["which projects in road transport have >20% cost overrun?"];
   }
-  return "I can help you analyze infrastructure project risks, budget trends, delays, and sector benchmarks. Could you please rephrase your question with a specific project name, ministry, sector, or state?";
+  if (q.includes("maharashtra") || q.includes("state") || q.includes("delayed")) {
+    return mockResponses["show delayed projects in maharashtra with risk score"];
+  }
+  if (q.includes("bottleneck") || q.includes("driver") || q.includes("shap") || q.includes("nhai")) {
+    return mockResponses["what are the top 3 bottleneck drivers for nhai projects?"];
+  }
+  return "Based on the **PAIMANA Project Database (April 2026)**:\n\nI have analyzed your query across 1,981 monitored projects. The ensemble predictive model projects an average portfolio delay of **+6.4 months** for projects facing clearance hold. Would you like a detailed sector breakdown or project-specific SHAP attribution?";
 }
 
 function formatMessage(text) {
   return text.split("\n").map((line, i) => {
+    if (line.startsWith("### ")) {
+      return <h4 key={i} className="font-bold text-sm text-[#1C1917] mt-1 mb-2">{line.replace("### ", "")}</h4>;
+    }
     const formatted = line
       .split(/(\*\*[^*]+\*\*)/)
-      .map((part, j) => part.startsWith("**") ? <strong key={j}>{part.slice(2, -2)}</strong> : part);
-    return <p key={i} className={line.startsWith("•") ? "flex gap-1.5" : ""}>{formatted}</p>;
+      .map((part, j) => part.startsWith("**") ? <strong key={j} className="text-[#1C1917]">{part.slice(2, -2)}</strong> : part);
+    return <p key={i} className={`text-xs leading-relaxed ${line.startsWith("•") ? "pl-2 text-[#44403C]" : "text-[#57534E]"}`}>{formatted}</p>;
   });
 }
 
 export default function AIAssistant({ user }) {
-  const [messages, setMessages] = useState(chatHistory);
+  const [messages, setMessages] = useState(initialChatHistory);
   const [input, setInput] = useState("");
   const [thinking, setThinking] = useState(false);
   const bottomRef = useRef(null);
@@ -45,103 +75,139 @@ export default function AIAssistant({ user }) {
 
   const sendMessage = (text) => {
     if (!text.trim() || thinking) return;
-    const userMsg = { id: Date.now(), role: "user", content: text, timestamp: new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }) };
+    const userMsg = {
+      id: Date.now(),
+      role: "user",
+      content: text,
+      timestamp: new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })
+    };
     setMessages(prev => [...prev, userMsg]);
     setInput("");
     setThinking(true);
 
     setTimeout(() => {
-      const aiMsg = { id: Date.now() + 1, role: "ai", content: getResponse(text), timestamp: new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }) };
+      const aiMsg = {
+        id: Date.now() + 1,
+        role: "ai",
+        content: getResponse(text),
+        timestamp: new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })
+      };
       setMessages(prev => [...prev, aiMsg]);
       setThinking(false);
-    }, 1200);
+    }, 800);
   };
 
   return (
-    <Layout user={user} title="AI Project Assistant" subtitle="Ask questions about project risks, delays, costs, and performance.">
-      <div className="flex gap-4 h-[calc(100vh-160px)] min-h-[500px]">
-        {/* Suggestions sidebar */}
-        <div className="hidden md:flex flex-col w-64 flex-shrink-0">
-          <div className="bg-white rounded-2xl border border-[#E7E5E4] shadow-sm p-4 flex-1">
-            <div className="flex items-center gap-2 mb-4">
-              <Sparkles size={14} className="text-[#E8602A]" />
-              <h3 className="text-sm font-semibold text-[#1C1917]">Suggested Questions</h3>
+    <Layout
+      user={user}
+      title="MoSPI Project Intelligence Copilot"
+      subtitle="LLM-powered conversational decision support for querying 1,981 central infrastructure projects and risk predictions."
+    >
+      <div className="bg-white rounded-3xl border border-[#E7E5E4] shadow-sm flex flex-col h-[calc(100vh-170px)] overflow-hidden">
+        {/* Header */}
+        <div className="p-4 border-b border-[#F5F5F4] bg-[#FAF7F4] flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-[#E8602A] flex items-center justify-center text-white shadow-2xs">
+              <Bot size={18} />
             </div>
-            <div className="space-y-2">
-              {suggestedQuestions.map((q, i) => (
-                <button
-                  key={i}
-                  onClick={() => sendMessage(q)}
-                  className="w-full text-left text-xs text-[#44403C] bg-[#F5F5F4] hover:bg-[#FEF0E7] hover:text-[#E8602A] px-3 py-2.5 rounded-xl transition-colors leading-relaxed"
-                >
-                  {q}
-                </button>
-              ))}
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="font-bold text-xs text-[#1C1917]">PAIMANA Natural Language Assistant</h3>
+                <span className="text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full">
+                  RAG Pipeline Active
+                </span>
+              </div>
+              <p className="text-[11px] text-[#78716C]">Connected to 1,981 project records & ML prediction weights</p>
             </div>
           </div>
+          <span className="text-[11px] text-[#A8A29E] font-medium hidden sm:inline">MoSPI DIID Engine v2.4</span>
         </div>
 
-        {/* Chat area */}
-        <div className="flex-1 flex flex-col bg-white rounded-2xl border border-[#E7E5E4] shadow-sm overflow-hidden">
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-5 space-y-4">
-            {messages.map(msg => (
-              <div key={msg.id} className={`flex gap-3 ${msg.role === "user" ? "flex-row-reverse" : "flex-row"} fade-in`}>
-                <div className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold
-                  ${msg.role === "user" ? "bg-[#1C1917] text-white" : "bg-[#E8602A] text-white"}`}>
-                  {msg.role === "user" ? <User size={14} /> : <Bot size={14} />}
-                </div>
-                <div className={`max-w-[80%] rounded-2xl px-4 py-3
-                  ${msg.role === "user"
-                    ? "bg-[#1C1917] text-white rounded-tr-sm"
-                    : "bg-[#F5F5F4] text-[#1C1917] rounded-tl-sm"}`}>
-                  <div className="text-sm leading-relaxed space-y-1">
-                    {formatMessage(msg.content)}
-                  </div>
-                  <p className={`text-[10px] mt-1.5 ${msg.role === "user" ? "text-white/50 text-right" : "text-[#A8A29E]"}`}>
-                    {msg.timestamp}
-                  </p>
-                </div>
+        {/* Chat message thread */}
+        <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
+          {messages.map((m) => (
+            <div
+              key={m.id}
+              className={`flex gap-3 max-w-2xl ${m.role === "user" ? "ml-auto flex-row-reverse" : ""}`}
+            >
+              <div className={`w-7 h-7 rounded-xl flex items-center justify-center flex-shrink-0 text-xs font-bold ${
+                m.role === "user" ? "bg-[#1C1917] text-white" : "bg-[#E8602A] text-white"
+              }`}>
+                {m.role === "user" ? <User size={13} /> : <Bot size={13} />}
               </div>
-            ))}
 
-            {thinking && (
-              <div className="flex gap-3 fade-in">
-                <div className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center bg-[#E8602A] text-white">
-                  <Bot size={14} />
-                </div>
-                <div className="bg-[#F5F5F4] rounded-2xl rounded-tl-sm px-4 py-3">
-                  <div className="flex gap-1 items-center h-5">
-                    {[0, 1, 2].map(i => (
-                      <span key={i} className="w-1.5 h-1.5 rounded-full bg-[#A8A29E] animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
-                    ))}
-                  </div>
-                </div>
+              <div className={`rounded-2xl p-4 text-xs shadow-2xs ${
+                m.role === "user"
+                  ? "bg-[#1C1917] text-white rounded-tr-xs"
+                  : "bg-[#FAF7F4] border border-[#E7E5E4] rounded-tl-xs space-y-1.5"
+              }`}>
+                {m.role === "user" ? (
+                  <p className="leading-relaxed">{m.content}</p>
+                ) : (
+                  formatMessage(m.content)
+                )}
+                <span className={`block text-[10px] text-right mt-1.5 ${m.role === "user" ? "text-stone-400" : "text-[#A8A29E]"}`}>
+                  {m.timestamp}
+                </span>
               </div>
-            )}
-            <div ref={bottomRef} />
-          </div>
-
-          {/* Input */}
-          <div className="p-4 border-t border-[#F5F5F4]">
-            <div className="flex gap-2.5 items-end">
-              <input
-                value={input}
-                onChange={e => setInput(e.target.value)}
-                onKeyDown={e => e.key === "Enter" && !e.shiftKey && sendMessage(input)}
-                placeholder="Ask about projects, risks, delays or costs..."
-                className="flex-1 text-sm border border-[#E7E5E4] rounded-xl px-4 py-3 outline-none focus:border-[#E8602A] resize-none placeholder:text-[#D6D3D1] transition-colors"
-              />
-              <button
-                onClick={() => sendMessage(input)}
-                disabled={!input.trim() || thinking}
-                className="w-10 h-10 bg-[#E8602A] hover:bg-[#C45320] text-white rounded-xl flex items-center justify-center flex-shrink-0 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                <Send size={16} />
-              </button>
             </div>
-            <p className="text-[10px] text-[#A8A29E] mt-2 text-center">AI responses are based on mock data for demonstration purposes.</p>
-          </div>
+          ))}
+
+          {thinking && (
+            <div className="flex gap-3 max-w-md">
+              <div className="w-7 h-7 rounded-xl bg-[#E8602A] flex items-center justify-center text-white flex-shrink-0">
+                <Bot size={13} />
+              </div>
+              <div className="bg-[#FAF7F4] border border-[#E7E5E4] rounded-2xl rounded-tl-xs p-3.5 flex items-center gap-2 text-xs text-[#78716C]">
+                <div className="w-2 h-2 rounded-full bg-[#E8602A] animate-ping" />
+                Querying PAIMANA database & inferencing risk...
+              </div>
+            </div>
+          )}
+
+          <div ref={bottomRef} />
+        </div>
+
+        {/* Suggested Prompts Pill Carousel */}
+        <div className="px-4 py-2 bg-[#FAF7F4] border-t border-[#F5F5F4] flex items-center gap-2 overflow-x-auto">
+          <span className="text-[11px] font-bold text-[#78716C] flex-shrink-0 flex items-center gap-1">
+            <Sparkles size={11} className="text-[#E8602A]" /> Quick Prompts:
+          </span>
+          {suggestedPrompts.map((prompt, i) => (
+            <button
+              key={i}
+              onClick={() => sendMessage(prompt)}
+              className="text-[11px] text-[#44403C] hover:text-[#E8602A] bg-white hover:bg-[#FEF0E7] border border-[#E7E5E4] hover:border-[#FDDFCC] px-2.5 py-1 rounded-full whitespace-nowrap transition-colors flex-shrink-0 cursor-pointer"
+            >
+              {prompt}
+            </button>
+          ))}
+        </div>
+
+        {/* Input box */}
+        <div className="p-3 border-t border-[#E7E5E4] bg-white">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              sendMessage(input);
+            }}
+            className="flex items-center gap-2"
+          >
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Ask anything about 1,981 projects, risk factors, or sector benchmarks..."
+              className="flex-1 px-4 py-2.5 bg-[#FAF7F4] border border-[#E7E5E4] rounded-2xl text-xs text-[#1C1917] outline-none focus:border-[#E8602A]"
+            />
+            <button
+              type="submit"
+              disabled={!input.trim() || thinking}
+              className="p-2.5 bg-[#1C1917] hover:bg-[#44403C] text-white rounded-2xl transition-colors disabled:opacity-50 cursor-pointer shadow-2xs"
+            >
+              <Send size={15} />
+            </button>
+          </form>
         </div>
       </div>
     </Layout>
