@@ -68,3 +68,65 @@ body {
   box-shadow: 0 8px 28px rgba(0,0,0,0.09);
   transform: translateY(-2px);
 }
+
+@keyframes sonarRing {
+  0% {
+    r: 4;
+    opacity: 0.9;
+    stroke-width: 2.5;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    r: 32;
+    opacity: 0;
+    stroke-width: 0.5;
+  }
+}
+
+@keyframes sonarRingSecondary {
+  0% {
+    r: 4;
+    opacity: 0.8;
+    stroke-width: 2;
+  }
+  50% {
+    opacity: 0.4;
+  }
+  100% {
+    r: 22;
+    opacity: 0;
+    stroke-width: 0.5;
+  }
+}
+
+.animate-sonar-1 {
+  animation: sonarRing 2.4s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+}
+
+.animate-sonar-2 {
+  animation: sonarRing 2.4s cubic-bezier(0.215, 0.61, 0.355, 1) 0.8s infinite;
+}
+
+.animate-sonar-3 {
+  animation: sonarRing 2.4s cubic-bezier(0.215, 0.61, 0.355, 1) 1.6s infinite;
+}
+
+.animate-sonar-fast {
+  animation: sonarRingSecondary 1.8s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+}
+
+@keyframes floatBadge {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.animate-float-badge {
+  animation: floatBadge 3s ease-in-out infinite;
+}
+

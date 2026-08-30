@@ -4,6 +4,7 @@ import { Search, Filter, ChevronLeft, ChevronRight, MapPin, LayoutGrid, List } f
 import Layout from "../components/Layout";
 import RiskBadge from "../components/RiskBadge";
 import ProgressBar from "../components/ProgressBar";
+import IndiaStateMap from "../components/IndiaStateMap";
 import { projects } from "../data/projects";
 
 const PAGE_SIZE = 8;
@@ -84,49 +85,9 @@ export default function Projects({ user }) {
       </div>
 
       {viewMode === "state_hotspots" ? (
-        /* State Geographic Hotspot Cards */
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-          {stateClusters.map((st, i) => (
-            <div key={i} className="bg-white rounded-2xl p-5 border border-[#E7E5E4] shadow-sm hover:shadow-md transition-all">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <div className="p-2 rounded-xl bg-[#FEF0E7] text-[#E8602A]">
-                    <MapPin size={16} />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-[#1C1917] text-sm">{st.state}</h3>
-                    <p className="text-[11px] text-[#78716C]">{st.projects} Major Projects Tracked</p>
-                  </div>
-                </div>
-                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                  st.highRisk > 1 ? "bg-red-100 text-red-700" : st.highRisk === 1 ? "bg-amber-100 text-amber-700" : "bg-emerald-100 text-emerald-700"
-                }`}>
-                  {st.status}
-                </span>
-              </div>
-
-              <div className="space-y-2 py-3 border-t border-b border-[#F5F5F4] text-xs">
-                <div className="flex justify-between">
-                  <span className="text-[#78716C]">Total Portfolio Value:</span>
-                  <span className="font-bold text-[#1C1917]">{st.totalValue}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-[#78716C]">High Risk Flagged:</span>
-                  <span className="font-bold text-red-600">{st.highRisk} Projects</span>
-                </div>
-              </div>
-
-              <button
-                onClick={() => {
-                  setState(st.state);
-                  setViewMode("list");
-                }}
-                className="mt-3 w-full py-2 bg-[#FAF7F4] hover:bg-[#FEF0E7] text-[#E8602A] text-xs font-bold rounded-xl transition-colors text-center"
-              >
-                Filter {st.state} Projects →
-              </button>
-            </div>
-          ))}
+        /* Interactive State Geospatial Map */
+        <div className="mb-6">
+          <IndiaStateMap />
         </div>
       ) : (
         /* Standard Project Filter & Table */
