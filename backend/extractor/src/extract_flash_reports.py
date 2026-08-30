@@ -284,7 +284,22 @@ def extract_pdf(pdf_path: str):
                         "physical_progress_pct": num1(progress),
                         "actual_doc": "",
                         "list_type": "ongoing",
-
+                    })
+                else:
+                    # context rows: ministry/department name or sector name.
+                    # In the All Ongoing Projects table the first col holds the
+                    # ministry/department header (forexaample 'Ministry of Civil Aviation',
+                    # 'Department of Telecommunications'), and the project-name
+                    # cell holds the sector header (e.g. 'Aviation & Aviation
+                    # Infrastructure', 'Telecommunication').
+                    first = " ".join((str(sl) if sl is not None else "").split())
+                    second = " ".join((str(nameblock) if nameblock is not None else "").split())
+                    txt = first or second
+                    if txt and not txt.isdigit():
+                        if any(k in txt for k in ("Ministry", "Department", "Commission", "NITI", "Administration", "Affairs")):
+                            current_ministry = txt
+                        else:
+                            current_sector = txt
     doc.close()
     return month_label, rows
 
