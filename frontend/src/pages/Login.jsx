@@ -111,7 +111,7 @@ export default function Login({ onLogin }) {
             {/* Portal Title & Clear Purpose */}
             <div>
               <h1 className="text-4xl sm:text-5xl font-black tracking-tight text-[#0F172A] leading-tight">
-                PAIMANA <span className="text-[#E8602A]">AI 2.0</span>
+                DRISHTI <span className="text-[#E8602A]">AI 2.0</span>
               </h1>
               <p className="text-base sm:text-lg font-bold text-[#334155] mt-2">
                 Central Sector Infrastructure Projects Monitoring Platform
@@ -240,7 +240,7 @@ export default function Login({ onLogin }) {
                     </span>
                   ) : (
                     <>
-                      <span>Sign In to PAIMANA Portal</span>
+                      <span>Sign In to DRISHTI Portal</span>
                       <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
                     </>
                   )}

@@ -1,5 +1,5 @@
 """
-MoSPI PAIMANA AI Engine - Real-Time Predictive Inference & Explainability
+MoSPI DRISHTI AI Engine - Real-Time Predictive Inference & Explainability
 Provides sub-50ms risk scoring, milestone slippage likelihood, and root-cause risk driver breakdown.
 """
 
@@ -8,7 +8,7 @@ import joblib
 import numpy as np
 import pandas as pd
 
-class PaimanaPredictor:
+class DrishtiPredictor:
     def __init__(self, models_dir=None):
         if models_dir is None:
             models_dir = os.path.join(os.path.dirname(__file__), "..", "models")
@@ -118,7 +118,7 @@ _predictor = None
 def get_predictor():
     global _predictor
     if _predictor is None:
-        _predictor = PaimanaPredictor()
+        _predictor = DrishtiPredictor()
     return _predictor
 
 if __name__ == "__main__":

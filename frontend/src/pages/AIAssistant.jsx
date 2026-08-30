@@ -6,7 +6,7 @@ const initialChatHistory = [
   {
     id: 1,
     role: "ai",
-    content: "Greetings! I am the **MoSPI PAIMANA Intelligence Copilot**. I analyze real-time project risk data, cost overruns, milestone lags, and SHAP factor attributions across **2,092 central infrastructure projects** in 17 Ministries. How can I assist your review today?",
+    content: "Greetings! I am the **MoSPI DRISHTI Intelligence Copilot**. I analyze real-time project risk data, cost overruns, milestone lags, and SHAP factor attributions across **2,092 central infrastructure projects** in 17 Ministries. How can I assist your review today?",
     timestamp: "10:00 AM"
   }
 ];
@@ -48,7 +48,7 @@ function getResponse(question) {
   if (q.includes("bottleneck") || q.includes("driver") || q.includes("shap") || q.includes("nhai")) {
     return mockResponses["what are the top 3 bottleneck drivers for nhai projects?"];
   }
-  return "Based on the **PAIMANA Project Database (April 2026)**:\n\nI have analyzed your query across 1,981 monitored projects. The ensemble predictive model projects an average portfolio delay of **+6.4 months** for projects facing clearance hold. Would you like a detailed sector breakdown or project-specific SHAP attribution?";
+  return "Based on the **DRISHTI Project Database (April 2026)**:\n\nI have analyzed your query across 1,981 monitored projects. The ensemble predictive model projects an average portfolio delay of **+6.4 months** for projects facing clearance hold. Would you like a detailed sector breakdown or project-specific SHAP attribution?";
 }
 
 function formatMessage(text) {
@@ -112,7 +112,7 @@ export default function AIAssistant({ user }) {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="font-bold text-xs text-[#1C1917]">PAIMANA Natural Language Assistant</h3>
+                <h3 className="font-bold text-xs text-[#1C1917]">DRISHTI Natural Language Assistant</h3>
                 <span className="text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full">
                   RAG Pipeline Active
                 </span>
@@ -160,7 +160,7 @@ export default function AIAssistant({ user }) {
               </div>
               <div className="bg-[#FAF7F4] border border-[#E7E5E4] rounded-2xl rounded-tl-xs p-3.5 flex items-center gap-2 text-xs text-[#78716C]">
                 <div className="w-2 h-2 rounded-full bg-[#E8602A] animate-ping" />
-                Querying PAIMANA database & inferencing risk...
+                Querying DRISHTI database & inferencing risk...
               </div>
             </div>
           )}

@@ -192,7 +192,7 @@ export default function AnalystDashboard({ user }) {
           </div>
           <div>
             <h4 className="font-bold text-[#1C1917] text-sm">Active Ensemble Model: XGBoost + Random Forest (v3.2)</h4>
-            <p className="text-xs text-[#78716C]">Trained on 1,981 PAIMANA Projects · Data Drift Score: 0.04 (Stable)</p>
+            <p className="text-xs text-[#78716C]">Trained on 1,981 DRISHTI Projects · Data Drift Score: 0.04 (Stable)</p>
           </div>
         </div>
 

@@ -4,7 +4,7 @@ from app.config import settings
 from app.api.v1.router import api_v1_router
 
 app = FastAPI(
-    title="MoSPI PAIMANA - Central Sector Infrastructure AI Monitoring API",
+    title="MoSPI DRISHTI - Central Sector Infrastructure AI Monitoring API",
     description="Enterprise Backend for Infrastructure Project Monitoring, ML Risk Early Warnings, and Supabase Integration.",
     version="1.0.0",
     docs_url="/docs",
@@ -25,7 +25,7 @@ app.add_middleware(
 def health_check():
     return {
         "status": "healthy",
-        "service": "MoSPI PAIMANA Backend & AI Engine",
+        "service": "MoSPI DRISHTI Backend & AI Engine",
         "version": "1.0.0",
         "database": "Supabase Cloud Connected" if settings.SUPABASE_URL else "Local Mode"
     }

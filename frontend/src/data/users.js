@@ -26,7 +26,7 @@ export const users = [
     role: "Project Administrator",
     name: "Amit Sharma",
     avatar: "AS",
-    department: "PAIMANA Data Informatics & Innovation Division (DIID)",
+    department: "DRISHTI Data Informatics & Innovation Division (DIID)",
     agency: "National Infrastructure Portal Administration"
   },
 ];

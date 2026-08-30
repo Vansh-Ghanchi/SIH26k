@@ -1,5 +1,5 @@
 """
-MoSPI PAIMANA AI Engine - Multi-Target Predictive Model Training
+MoSPI DRISHTI AI Engine - Multi-Target Predictive Model Training
 Trains ensemble classifiers for Early Warnings, High-Risk Overruns, and Deadline Slips.
 """
 

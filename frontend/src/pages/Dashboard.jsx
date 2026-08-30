@@ -138,7 +138,7 @@ export default function Dashboard({ user }) {
     <Layout
       user={user}
       title="Government Project Monitoring Overview"
-      subtitle="PAIMANA centralized intelligence portal for Central Sector Infrastructure Projects (₹150 Cr+)."
+      subtitle="DRISHTI centralized intelligence portal for Central Sector Infrastructure Projects (₹150 Cr+)."
       showDateRange
       onExport={() => handleAction("Executive Portfolio Summary (April 2026) exported successfully!")}
     >

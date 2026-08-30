@@ -1,5 +1,5 @@
 -- ==============================================================================
--- MoSPI PAIMANA - Central Sector Infrastructure Projects Database Schema
+-- MoSPI DRISHTI - Central Sector Infrastructure Projects Database Schema
 -- Supabase (PostgreSQL) Initial Migration Script
 -- ==============================================================================
 

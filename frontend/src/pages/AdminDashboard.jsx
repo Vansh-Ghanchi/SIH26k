@@ -50,14 +50,14 @@ const cufIngestionBatches = [
 
 const systemNodes = [
   { name: "ML Risk Scoring Pipeline", type: "Inference Cluster", status: "Healthy", load: "34%", memory: "18.4 GB / 32 GB", uptime: "99.98%" },
-  { name: "PostgreSQL PAIMANA Data Lake", type: "Database Cluster", status: "Healthy", load: "48%", memory: "42.1 GB / 64 GB", uptime: "100%" },
+  { name: "PostgreSQL DRISHTI Data Lake", type: "Database Cluster", status: "Healthy", load: "48%", memory: "42.1 GB / 64 GB", uptime: "100%" },
   { name: "Realtime WebSocket Broker", type: "Event Bus", status: "Healthy", load: "22%", memory: "8.2 GB / 16 GB", uptime: "99.95%" },
   { name: "GIS Geospatial Map Server", type: "Geospatial Tile Engine", status: "Optimal", load: "39%", memory: "14.6 GB / 32 GB", uptime: "99.91%" },
 ];
 
 const auditLogs = [
   { id: "LOG-9821", action: "User Role Elevated to Analyst", target: "Sunita Rao", actor: "Amit Sharma (Admin)", time: "10:14 AM", status: "Success" },
-  { id: "LOG-9820", action: "ML Ensemble Retrained (v3.2)", target: "PAIMANA-ML-Engine", actor: "System Scheduled Cron", time: "09:30 AM", status: "Success" },
+  { id: "LOG-9820", action: "ML Ensemble Retrained (v3.2)", target: "DRISHTI-ML-Engine", actor: "System Scheduled Cron", time: "09:30 AM", status: "Success" },
   { id: "LOG-9819", action: "API Gateway Token Issued", target: "NHAI Project Connect", actor: "Amit Sharma (Admin)", time: "08:45 AM", status: "Success" },
   { id: "LOG-9818", action: "Failed Login Challenge", target: "IP 192.168.1.44 (3 attempts)", actor: "Security Firewall", time: "06:12 AM", status: "Warning" },
 ];
@@ -103,7 +103,7 @@ export default function AdminDashboard({ user }) {
   return (
     <Layout
       user={user}
-      title="PAIMANA Administrator Portal"
+      title="DRISHTI Administrator Portal"
       subtitle="Administrative control center: Manage Ministry access, CUF monthly ingestion pipelines, system clusters, and audit security compliance."
       showDateRange={false}
     >

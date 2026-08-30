@@ -1,6 +1,6 @@
 import { Menu, Calendar, Download } from "lucide-react";
 import mospiLogo from "../assets/mospi-emblem-clean.png";
-import paimanaLogo from "../assets/paimana-logo-clean.png";
+import drishtiLogo from "../assets/drishti-logo.png";
 
 export default function GovtHeaderBanner({
   title,
@@ -38,7 +38,7 @@ export default function GovtHeaderBanner({
         <div className="flex-1 min-w-0 text-center px-2">
           <div className="inline-flex items-center justify-center gap-2 flex-wrap">
             <h1 className="text-base sm:text-lg md:text-xl font-black text-[#1C1917] tracking-tight truncate max-w-lg">
-              {title}
+              {title || "DRISHTI Portal"}
             </h1>
             <span className="hidden lg:inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#FEF0E7] text-[#E8602A] border border-[#FDDFCC] whitespace-nowrap">
               MoSPI · Central IPMD
@@ -51,7 +51,7 @@ export default function GovtHeaderBanner({
           )}
         </div>
 
-        {/* Right Side: PAIMANA Typography Logo + Quick Context Actions if any */}
+        {/* Right Side: DRISHTI Typography Logo with Infrastructure & Vision Symbols */}
         <div className="flex items-center gap-3 flex-shrink-0">
           {showDateRange && (
             <button className="hidden xl:flex items-center gap-1.5 text-xs font-semibold text-[#44403C] bg-[#F5F5F4] hover:bg-[#E7E5E4] border border-[#E7E5E4] px-3 py-1.5 rounded-xl transition-colors">
@@ -71,9 +71,9 @@ export default function GovtHeaderBanner({
 
           <div className="flex items-center">
             <img
-              src={paimanaLogo}
-              alt="PAIMANA - Central Sector Infrastructure Project Monitoring Portal"
-              className="h-7 sm:h-9 md:h-10 w-auto max-w-[120px] sm:max-w-[160px] md:max-w-[190px] object-contain select-none"
+              src={drishtiLogo}
+              alt="DRISHTI - Data-driven Risk Intelligence System for Infrastructure Tracking & Insights"
+              className="h-10 sm:h-12 md:h-14 lg:h-15 w-auto max-w-[180px] sm:max-w-[240px] md:max-w-[300px] object-contain select-none transition-transform hover:scale-105"
             />
           </div>
         </div>

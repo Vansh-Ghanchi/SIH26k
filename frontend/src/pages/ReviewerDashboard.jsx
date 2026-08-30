@@ -18,7 +18,7 @@ const reviewerKpis = [
     icon: Clock, accentColor: "orange", change: "April 2026 Cycle", changeType: "neutral"
   },
   {
-    title: "Approved This Month", value: "34", subtitle: "Ingested into PAIMANA Data Lake",
+    title: "Approved This Month", value: "34", subtitle: "Ingested into DRISHTI Data Lake",
     icon: CheckCircle2, accentColor: "green", change: "+16 this week", changeType: "up"
   },
   {
@@ -136,7 +136,7 @@ export default function ReviewerDashboard({ user }) {
   const handleApproveRegistration = (id) => {
     setRegQueue(prev => prev.filter(r => r.id !== id));
     setToastType("success");
-    setToastMsg("Project Registration " + id + " Approved! Assigned PAIMANA Master ID PRJ-" + Math.floor(1000 + Math.random() * 9000));
+    setToastMsg("Project Registration " + id + " Approved! Assigned DRISHTI Master ID PRJ-" + Math.floor(1000 + Math.random() * 9000));
     if (regQueue.length > 1) {
       setSelectedReg(regQueue.find(r => r.id !== id));
     } else {
@@ -196,7 +196,7 @@ export default function ReviewerDashboard({ user }) {
     <Layout
       user={user}
       title="Reviewer & Monitoring Authority Centre"
-      subtitle="Verify new project registrations, audit monthly CUF progress submissions, check discrepancy diffs, and approve snapshots into PAIMANA."
+      subtitle="Verify new project registrations, audit monthly CUF progress submissions, check discrepancy diffs, and approve snapshots into DRISHTI."
       showDateRange={false}
     >
       {/* Toast Notification */}
@@ -363,7 +363,7 @@ export default function ReviewerDashboard({ user }) {
                     onClick={() => handleApproveRegistration(selectedReg.id)}
                     className="flex-1 py-2.5 bg-[#1C1917] hover:bg-[#44403C] text-white font-semibold rounded-xl text-xs transition-colors flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
                   >
-                    <CheckCircle2 size={14} /> Approve Registration & Assign PAIMANA ID
+                    <CheckCircle2 size={14} /> Approve Registration & Assign DRISHTI ID
                   </button>
                 </div>
               </div>
@@ -376,7 +376,7 @@ export default function ReviewerDashboard({ user }) {
             </div>
             <h3 className="font-bold text-[#1C1917] text-base">All Project Registrations Verified!</h3>
             <p className="text-xs text-[#78716C] mt-1 max-w-sm">
-              All submitted new project proposals have been processed and added to the Central PAIMANA master repository.
+              All submitted new project proposals have been processed and added to the Central DRISHTI master repository.
             </p>
           </div>
         )
@@ -525,7 +525,7 @@ export default function ReviewerDashboard({ user }) {
             </div>
             <h3 className="font-bold text-[#1C1917] text-base">All Monthly Submissions Audited!</h3>
             <p className="text-xs text-[#78716C] mt-1 max-w-sm">
-              All monthly CUF data has been audited and ingested into the PAIMANA predictive AI pipeline.
+              All monthly CUF data has been audited and ingested into the DRISHTI predictive AI pipeline.
             </p>
           </div>
         )

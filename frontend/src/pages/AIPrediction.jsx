@@ -68,7 +68,7 @@ export default function AIPrediction({ user }) {
     <Layout
       user={user}
       title="AI Predictive Risk Engine"
-      subtitle="Predict cost escalations, schedule delays, and risk trajectories using PAIMANA & Common Upload Form (CUF) parameters."
+      subtitle="Predict cost escalations, schedule delays, and risk trajectories using DRISHTI & Common Upload Form (CUF) parameters."
     >
       {/* Mode Switcher Tabs */}
       <div className="flex items-center gap-2 mb-5 p-1.5 bg-[#F5F5F4] rounded-2xl w-fit border border-[#E7E5E4]">
@@ -103,7 +103,7 @@ export default function AIPrediction({ user }) {
             <div className="flex flex-col sm:flex-row sm:items-center gap-3">
               <div className="flex items-center gap-2">
                 <Brain size={16} className="text-[#E8602A] flex-shrink-0" />
-                <label className="text-sm font-semibold text-[#1C1917]">Select PAIMANA Project:</label>
+                <label className="text-sm font-semibold text-[#1C1917]">Select DRISHTI Project:</label>
               </div>
               <select
                 value={selectedId}

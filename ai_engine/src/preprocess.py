@@ -1,6 +1,6 @@
 """
-MoSPI PAIMANA AI Engine - Data Preprocessing & Pipeline
-Cleans and prepares SIH PAIMANA and features datasets for ML training and real-time inference.
+MoSPI DRISHTI AI Engine - Data Preprocessing & Pipeline
+Cleans and prepares SIH DRISHTI and features datasets for ML training and real-time inference.
 """
 
 import os

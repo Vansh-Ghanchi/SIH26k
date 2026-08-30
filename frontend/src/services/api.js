@@ -1,5 +1,5 @@
 /**
- * MoSPI PAIMANA - Central API Service Layer
+ * MoSPI DRISHTI - Central API Service Layer
  * Seamless live FastAPI & Supabase backend connector with graceful fallback
  */
 

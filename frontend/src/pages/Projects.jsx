@@ -53,7 +53,7 @@ export default function Projects({ user }) {
     <Layout
       user={user}
       title="Monitored Projects Repository"
-      subtitle={`Comprehensive PAIMANA portfolio tracking ${projects.length.toLocaleString('en-IN')} central infrastructure projects across 17 ministries & 14 sectors.`}
+      subtitle={`Comprehensive DRISHTI portfolio tracking ${projects.length.toLocaleString('en-IN')} central infrastructure projects across 17 ministries & 14 sectors.`}
     >
       {/* View Switcher & Counter */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
