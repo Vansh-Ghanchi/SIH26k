@@ -12,6 +12,21 @@ out/
 */build/
 */out/
 
+# Python (backend/extractor, backend/ml)
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Generated extraction output (regenerate with src/extract_flash_reports.py)
+backend/extractor/data/
+
+# FlashReport source PDFs
+backend/extractor/flash_reports/
+
 # Environment Variables & Secrets (NEVER COMMIT SENSITIVE KEYS)
 .env
 .env.local
