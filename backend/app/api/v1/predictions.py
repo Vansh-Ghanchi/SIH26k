@@ -31,6 +31,8 @@ class PredictionRequest(BaseModel):
     ministry_freq: int = 300
     months_to_revised_doc: int = 6
 
+@router.post("")
+@router.post("/")
 @router.post("/predict-risk")
 def predict_project_risk(payload: PredictionRequest):
     if predictor:
