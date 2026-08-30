@@ -52,7 +52,7 @@ export default function Login({ onLogin }) {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAFCFF] flex flex-col justify-between selection:bg-[#E8602A] selection:text-white font-paimana relative overflow-hidden">
+    <div className="min-h-screen bg-[#FAFCFF] flex flex-col justify-between selection:bg-[#E8602A] selection:text-white font-inter relative overflow-hidden">
       {/* 1. Official Top Government Banner */}
       <GovtHeaderBanner />
 
