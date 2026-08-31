@@ -3,16 +3,19 @@ import sys
 import math
 from typing import Dict, Any, List
 
+import importlib
+
 # Add ai_engine to sys.path
 ai_engine_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "ai_engine", "src"))
 if ai_engine_path not in sys.path:
     sys.path.append(ai_engine_path)
 
+_predictor = None
 try:
-    from predict import get_predictor
-    _predictor = get_predictor()
+    predict_mod = importlib.import_module("predict")
+    if hasattr(predict_mod, "get_predictor"):
+        _predictor = predict_mod.get_predictor()
 except Exception as e:
-    print(f"[MLService] AI Engine Predictor notice: {e}")
     _predictor = None
 
 class MLService:
@@ -74,7 +77,7 @@ class MLService:
                 "factor": "Cost Escalation & Budget Revisions",
                 "contribution": min(34, max(4, round(cost_ratio * 0.85) + 6)),
                 "direction": "positive" if cost_ratio > 5 else "negative",
-                "description": f"Total revised budget estimate ₹{cost:,.1f} Cr."
+                "description": f"Total revised budget estimate Rs. {cost:,.1f} Cr."
             },
             {
                 "factor": "Land & Environmental Clearances",
@@ -108,8 +111,8 @@ class MLService:
         narrative = (
             f"Project '{name}' is currently classified under {risk_level.upper()} RISK ({risk_score}/100). "
             f"The primary bottleneck is a {100 - progress:.0f}% milestone lag against scheduled timelines, combined with an "
-            f"approved revised cost of ₹{cost:,.1f} Cr. Historical pattern matching across similar {sector} projects indicates "
-            f"a 74% probability of 6–12 months commissioning delay unless land acquisition and contractor supply chains are expedited."
+            f"approved revised cost of Rs. {cost:,.1f} Cr. Historical pattern matching across similar {sector} projects indicates "
+            f"a 74% probability of 6-12 months commissioning delay unless land acquisition and contractor supply chains are expedited."
         )
 
         return {
@@ -171,7 +174,7 @@ class MLService:
             "risk_mitigation_pct": max(0.0, mitigation_pct),
             "projected_cost_saving_cr": cost_saving,
             "months_saved": months_saved,
-            "policy_synthesis": f"Policy intervention reduces risk by {max(0.0, mitigation_pct)}%, protecting an estimated ₹{cost_saving:,.1f} Cr and saving {months_saved} months in schedule delay."
+            "policy_synthesis": f"Policy intervention reduces risk by {max(0.0, mitigation_pct)}%, protecting an estimated Rs. {cost_saving:,.1f} Cr and saving {months_saved} months in schedule delay."
         }
 
 ml_service = MLService()

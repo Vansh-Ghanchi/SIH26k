@@ -1,6 +1,6 @@
 import sys
 from supabase import create_client, Client
-from app.config import settings
+from app.core.config import settings
 
 _client: Client = None
 

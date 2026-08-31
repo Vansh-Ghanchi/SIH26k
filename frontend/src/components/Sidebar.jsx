@@ -135,7 +135,7 @@ export default function Sidebar({ user, mobileOpen, onClose }) {
                   <Shield size={16} className="text-white" />
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-[#1C1917]">PAIMANA AI</p>
+                  <p className="text-sm font-bold text-[#1C1917]">DRISHTI AI</p>
                   <p className="text-[9px] text-[#E8602A] font-bold uppercase">MoSPI · IPMD</p>
                 </div>
               </div>
