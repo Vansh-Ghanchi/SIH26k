@@ -2,13 +2,14 @@ import { useState } from "react";
 import {
   Users, Server, ShieldCheck, UserCheck, Activity,
   Lock, RefreshCw, Plus, CheckCircle, AlertTriangle, Search, Filter, Settings,
-  Database, FileSpreadsheet, Key, ArrowUpRight, CheckCircle2, Clock
+  Database, FileSpreadsheet, Key, ArrowUpRight, CheckCircle2, Clock, Sparkles,
+  Play, ShieldAlert, Cpu
 } from "lucide-react";
 import Layout from "../components/Layout";
 import StatCard from "../components/StatCard";
 import ProgressBar from "../components/ProgressBar";
 
-const adminKpis = [
+const initialKpis = [
   {
     title: "Registered Users", value: "1,428", subtitle: "Across 17 Ministries",
     icon: Users, accentColor: "orange", change: "+24 this week", changeType: "up"
@@ -18,7 +19,7 @@ const adminKpis = [
     icon: Server, accentColor: "green", change: "99.98% Uptime", changeType: "up"
   },
   {
-    title: "CUF Monthly Sync", value: "15 / 17", subtitle: "Ministries submitted",
+    title: "CUF Monthly Sync", value: "16 / 17", subtitle: "Ministries submitted",
     icon: Database, accentColor: "orange", change: "April 2026 Cycle", changeType: "neutral"
   },
   {
@@ -31,46 +32,58 @@ const adminKpis = [
   },
 ];
 
-const mockUsersList = [
-  { id: 1, name: "Rajesh Kumar", email: "officer@infrawatch.gov.in", role: "Government Officer", department: "Ministry of Road Transport", status: "Active", lastActive: "Just now" },
-  { id: 2, name: "Amit Sharma", email: "admin@infrawatch.gov.in", role: "Project Administrator", department: "Infrastructure Division (MoSPI)", status: "Active", lastActive: "5 mins ago" },
-  { id: 3, name: "Priya Patel", email: "analyst@infrawatch.gov.in", role: "Analyst", department: "Risk & Analytics Cell", status: "Active", lastActive: "12 mins ago" },
-  { id: 4, name: "Vikram Malhotra", email: "vikram.m@nhai.gov.in", role: "Government Officer", department: "NHAI North Zone", status: "Active", lastActive: "1 hour ago" },
-  { id: 5, name: "Sunita Rao", email: "sunita.r@jalshakti.gov.in", role: "Analyst", department: "Jal Shakti Water Board", status: "Pending", lastActive: "Yesterday" },
-  { id: 6, name: "Arun Verma", email: "arun.v@railways.gov.in", role: "Government Officer", department: "Ministry of Railways", status: "Active", lastActive: "2 days ago" },
+const initialUsersList = [
+  { id: 1, name: "Dr. Rajesh Kumar (IAS)", email: "rajesh.kumar@mospi.gov.in", role: "Government Officer", department: "Ministry of Road Transport & Highways", status: "Active", lastActive: "Just now" },
+  { id: 2, name: "Ananya Deshmukh", email: "ananya.reviewer@mospi.gov.in", role: "Reviewer / Monitoring Officer", department: "Central IPMD Audit Cell", status: "Active", lastActive: "4 mins ago" },
+  { id: 3, name: "Amit Sharma", email: "admin.system@mospi.gov.in", role: "Project Administrator", department: "Infrastructure Project Monitoring Division (MoSPI)", status: "Active", lastActive: "10 mins ago" },
+  { id: 4, name: "Vikram Malhotra", email: "vikram.m@nhai.gov.in", role: "Government Officer", department: "NHAI National Highway Operations", status: "Active", lastActive: "1 hour ago" },
+  { id: 5, name: "Sanjay Barua", email: "sanjay.b@iwai.gov.in", role: "Government Officer", department: "Inland Waterways Authority of India (IWAI)", status: "Active", lastActive: "3 hours ago" },
+  { id: 6, name: "M. K. Tripathy", email: "tripathy.mk@cpwd.gov.in", role: "Reviewer / Monitoring Officer", department: "CPWD Verification Directorate", status: "Active", lastActive: "Yesterday" },
 ];
 
-const cufIngestionBatches = [
-  { ministry: "Ministry of Road Transport & Highways", projects: 312, records: 312, status: "Validated & Synced", date: "28 Apr 2026", latency: "1.2s" },
-  { ministry: "Ministry of Railways", projects: 405, records: 405, status: "Validated & Synced", date: "29 Apr 2026", latency: "2.1s" },
-  { ministry: "Ministry of Petroleum & Natural Gas", projects: 218, records: 218, status: "Validated & Synced", date: "30 Apr 2026", latency: "0.9s" },
-  { ministry: "Ministry of Jal Shakti", projects: 280, records: 268, status: "Validation Warning", date: "Today", latency: "1.8s" },
-  { ministry: "Ministry of Power & Renewable Energy", projects: 366, records: 0, status: "Sync Pending", date: "Due in 2 days", latency: "--" },
+const initialIngestionBatches = [
+  { id: 1, ministry: "Ministry of Road Transport & Highways", projects: 312, records: 312, status: "Validated & Synced", date: "28 Apr 2026", latency: "1.2s", syncing: false },
+  { id: 2, ministry: "Ministry of Railways", projects: 405, records: 405, status: "Validated & Synced", date: "29 Apr 2026", latency: "2.1s", syncing: false },
+  { id: 3, ministry: "Ministry of Petroleum & Natural Gas", projects: 218, records: 218, status: "Validated & Synced", date: "30 Apr 2026", latency: "0.9s", syncing: false },
+  { id: 4, ministry: "Ministry of Jal Shakti", projects: 280, records: 280, status: "Validated & Synced", date: "Today, 11:20 AM", latency: "1.8s", syncing: false },
+  { id: 5, ministry: "Ministry of Power & Renewable Energy", projects: 366, records: 0, status: "Sync Pending", date: "Due in 2 days", latency: "--", syncing: false },
 ];
 
-const systemNodes = [
-  { name: "ML Risk Scoring Pipeline", type: "Inference Cluster", status: "Healthy", load: "34%", memory: "18.4 GB / 32 GB", uptime: "99.98%" },
-  { name: "PostgreSQL DRISHTI Data Lake", type: "Database Cluster", status: "Healthy", load: "48%", memory: "42.1 GB / 64 GB", uptime: "100%" },
-  { name: "Realtime WebSocket Broker", type: "Event Bus", status: "Healthy", load: "22%", memory: "8.2 GB / 16 GB", uptime: "99.95%" },
-  { name: "GIS Geospatial Map Server", type: "Geospatial Tile Engine", status: "Optimal", load: "39%", memory: "14.6 GB / 32 GB", uptime: "99.91%" },
+const initialSystemNodes = [
+  { name: "DRISHTI ML Risk Ensemble (XGBoost + LSTM)", type: "Inference Cluster", status: "Healthy", load: "34%", memory: "18.4 GB / 32 GB", uptime: "99.98%" },
+  { name: "Supabase PostgreSQL DRISHTI Data Lake", type: "Database Cluster", status: "Healthy", load: "48%", memory: "42.1 GB / 64 GB", uptime: "100%" },
+  { name: "Realtime WebSocket Telemetry Broker", type: "Event Bus", status: "Healthy", load: "22%", memory: "8.2 GB / 16 GB", uptime: "99.95%" },
+  { name: "GIS Geospatial Vector Map Engine", type: "Geospatial Tile Server", status: "Optimal", load: "39%", memory: "14.6 GB / 32 GB", uptime: "99.91%" },
 ];
 
-const auditLogs = [
-  { id: "LOG-9821", action: "User Role Elevated to Analyst", target: "Sunita Rao", actor: "Amit Sharma (Admin)", time: "10:14 AM", status: "Success" },
-  { id: "LOG-9820", action: "ML Ensemble Retrained (v3.2)", target: "DRISHTI-ML-Engine", actor: "System Scheduled Cron", time: "09:30 AM", status: "Success" },
-  { id: "LOG-9819", action: "API Gateway Token Issued", target: "NHAI Project Connect", actor: "Amit Sharma (Admin)", time: "08:45 AM", status: "Success" },
-  { id: "LOG-9818", action: "Failed Login Challenge", target: "IP 192.168.1.44 (3 attempts)", actor: "Security Firewall", time: "06:12 AM", status: "Warning" },
+const initialAuditLogs = [
+  { id: "LOG-9823", action: "Reviewer Verification Completed", target: "Vadodara-Mumbai Expwy", actor: "Ananya Deshmukh (Reviewer)", time: "Just now", status: "Success" },
+  { id: "LOG-9822", action: "User Provisioned & RBAC Assigned", target: "Dr. Rajesh Kumar", actor: "Amit Sharma (Admin)", time: "10:14 AM", status: "Success" },
+  { id: "LOG-9821", action: "ML Ensemble Retrained (v3.2)", target: "DRISHTI-ML-Engine", actor: "System Scheduled Cron", time: "09:30 AM", status: "Success" },
+  { id: "LOG-9820", action: "API Gateway Token Issued", target: "NHAI Project Connect", actor: "Amit Sharma (Admin)", time: "08:45 AM", status: "Success" },
+  { id: "LOG-9819", action: "Failed Login Challenge Mitigated", target: "IP 192.168.1.44 (Blocked)", actor: "Security Firewall", time: "06:12 AM", status: "Warning" },
 ];
 
 export default function AdminDashboard({ user }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("All");
-  const [usersList, setUsersList] = useState(mockUsersList);
+  const [usersList, setUsersList] = useState(initialUsersList);
+  const [batches, setBatches] = useState(initialIngestionBatches);
+  const [auditLogList, setAuditLogList] = useState(initialAuditLogs);
+  const [isRetraining, setIsRetraining] = useState(false);
+  const [toastMsg, setToastMsg] = useState("");
+
+  // Modal State
   const [showAddModal, setShowAddModal] = useState(false);
   const [newName, setNewName] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [newRole, setNewRole] = useState("Government Officer");
-  const [newDept, setNewDept] = useState("Ministry of Road Transport");
+  const [newDept, setNewDept] = useState("Ministry of Road Transport & Highways");
+
+  const showToast = (msg) => {
+    setToastMsg(msg);
+    setTimeout(() => setToastMsg(""), 4500);
+  };
 
   const filteredUsers = usersList.filter(u => {
     const matchesSearch = u.name.toLowerCase().includes(searchTerm.toLowerCase()) || u.email.toLowerCase().includes(searchTerm.toLowerCase()) || u.department.toLowerCase().includes(searchTerm.toLowerCase());
@@ -79,7 +92,14 @@ export default function AdminDashboard({ user }) {
   });
 
   const toggleUserStatus = (id) => {
-    setUsersList(prev => prev.map(u => u.id === id ? { ...u, status: u.status === "Active" ? "Suspended" : "Active" } : u));
+    setUsersList(prev => prev.map(u => {
+      if (u.id === id) {
+        const nextStatus = u.status === "Active" ? "Suspended" : "Active";
+        showToast(`User account ${u.name} status updated to: ${nextStatus}`);
+        return { ...u, status: nextStatus };
+      }
+      return u;
+    }));
   };
 
   const handleAddUser = (e) => {
@@ -95,9 +115,56 @@ export default function AdminDashboard({ user }) {
       lastActive: "Just now"
     };
     setUsersList(prev => [newUser, ...prev]);
+    setAuditLogList(prev => [
+      { id: `LOG-${Math.floor(1000 + Math.random() * 9000)}`, action: `Provisioned New User (${newRole})`, target: newName, actor: "Amit Sharma (Admin)", time: "Just now", status: "Success" },
+      ...prev
+    ]);
     setShowAddModal(false);
     setNewName("");
     setNewEmail("");
+    showToast(`New user ${newName} (${newRole}) successfully provisioned!`);
+  };
+
+  // Trigger Force Ingestion
+  const handleForceSync = (batchId) => {
+    setBatches(prev => prev.map(b => b.id === batchId ? { ...b, syncing: true } : b));
+    showToast(`Initiating multi-threaded CUF validation pipeline for Ministry...`);
+
+    setTimeout(() => {
+      setBatches(prev => prev.map(b => {
+        if (b.id === batchId) {
+          return {
+            ...b,
+            syncing: false,
+            records: b.projects,
+            status: "Validated & Synced",
+            date: "Just now",
+            latency: "1.1s"
+          };
+        }
+        return b;
+      }));
+      setAuditLogList(prev => [
+        { id: `LOG-${Math.floor(1000 + Math.random() * 9000)}`, action: "Manual CUF Ingestion Synced", target: "Ministry of Power & Renewable Energy", actor: "Amit Sharma (Admin)", time: "Just now", status: "Success" },
+        ...prev
+      ]);
+      showToast(`CUF Data Lake Ingestion Completed: 366 Projects validated & synced!`);
+    }, 1800);
+  };
+
+  // Trigger ML Model Retrain
+  const handleRetrainModels = () => {
+    setIsRetraining(true);
+    showToast("Triggering DRISHTI Multi-Target ML Retraining (XGBoost + LSTM Multi-Step)...");
+
+    setTimeout(() => {
+      setIsRetraining(false);
+      setAuditLogList(prev => [
+        { id: `LOG-${Math.floor(1000 + Math.random() * 9000)}`, action: "ML Ensemble Retrained (v3.3)", target: "DRISHTI-ML-Engine", actor: "Amit Sharma (Admin)", time: "Just now", status: "Success" },
+        ...prev
+      ]);
+      showToast("DRISHTI ML Model Ensemble successfully retrained (v3.3) with latest 2,098 project weights!");
+    }, 2200);
   };
 
   return (
@@ -107,19 +174,30 @@ export default function AdminDashboard({ user }) {
       subtitle="Administrative control center: Manage Ministry access, CUF monthly ingestion pipelines, system clusters, and audit security compliance."
       showDateRange={false}
     >
+      {/* Toast Notification */}
+      {toastMsg && (
+        <div className="mb-4 p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl text-xs font-semibold flex items-center justify-between shadow-xs animate-fade-in">
+          <span className="flex items-center gap-2">
+            <CheckCircle2 size={16} className="text-emerald-600" />
+            {toastMsg}
+          </span>
+          <button onClick={() => setToastMsg("")} className="text-stone-600 hover:text-stone-900 cursor-pointer font-bold px-1">✕</button>
+        </div>
+      )}
+
       {/* Top Admin KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4 mb-6">
-        {adminKpis.map((k, i) => (
+        {initialKpis.map((k, i) => (
           <StatCard key={i} {...k}>
             <div className="mt-3">
               <ProgressBar
-                value={i === 0 ? 82 : i === 1 ? 100 : i === 2 ? 88 : i === 3 ? 100 : 92}
+                value={i === 0 ? 82 : i === 1 ? 100 : i === 2 ? 94 : i === 3 ? 100 : 92}
                 color={i === 2 ? "accent" : i === 0 ? "accent" : "success"}
                 height="h-1"
                 animate
               />
               <p className="text-xs text-[#A8A29E] mt-1.5 font-medium">
-                {i === 0 ? "88% gov.in verified" : i === 1 ? "Zero downtime recorded" : i === 2 ? "88.2% cycle complete" : i === 3 ? "ISO 27001 compliant" : "Sub-50ms target met"}
+                {i === 0 ? "100% gov.in verified" : i === 1 ? "Zero downtime recorded" : i === 2 ? "94.1% cycle complete" : i === 3 ? "ISO 27001 compliant" : "Sub-50ms target met"}
               </p>
             </div>
           </StatCard>
@@ -132,7 +210,7 @@ export default function AdminDashboard({ user }) {
           <div>
             <div className="flex items-center gap-2">
               <Database size={17} className="text-[#E8602A]" />
-              <h3 className="font-semibold text-[#1C1917] text-base">Ministry CUF Monthly Data Ingestion Monitor</h3>
+              <h3 className="font-bold text-[#1C1917] text-base">Ministry CUF Monthly Data Ingestion Monitor</h3>
             </div>
             <p className="text-xs text-[#78716C] mt-0.5">Real-time status of monthly Common Upload Form (CUF) synchronization across 17 Central Ministries.</p>
           </div>
@@ -150,17 +228,17 @@ export default function AdminDashboard({ user }) {
                 <th className="py-2.5 px-3">Records Validated</th>
                 <th className="py-2.5 px-3">Ingestion Status</th>
                 <th className="py-2.5 px-3">Last Sync</th>
-                <th className="py-2.5 pr-3 text-right">Pipeline Latency</th>
+                <th className="py-2.5 pr-3 text-right">Action / Latency</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#F5F5F4]">
-              {cufIngestionBatches.map((b, i) => (
-                <tr key={i} className="hover:bg-[#FAF7F4]/60 transition-colors">
+              {batches.map((b) => (
+                <tr key={b.id} className="hover:bg-[#FAF7F4]/60 transition-colors">
                   <td className="py-3 pl-3 font-semibold text-[#1C1917]">{b.ministry}</td>
                   <td className="py-3 px-3 text-[#44403C] font-medium">{b.projects} Projects</td>
                   <td className="py-3 px-3 font-mono">{b.records} / {b.projects}</td>
                   <td className="py-3 px-3">
-                    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
                       b.status.includes("Validated")
                         ? "bg-emerald-100 text-emerald-800"
                         : b.status.includes("Warning")
@@ -174,7 +252,19 @@ export default function AdminDashboard({ user }) {
                     </span>
                   </td>
                   <td className="py-3 px-3 text-[#78716C]">{b.date}</td>
-                  <td className="py-3 pr-3 text-right font-mono font-medium text-[#78716C]">{b.latency}</td>
+                  <td className="py-3 pr-3 text-right">
+                    {b.status === "Sync Pending" ? (
+                      <button
+                        onClick={() => handleForceSync(b.id)}
+                        disabled={b.syncing}
+                        className="px-3 py-1 bg-[#E8602A] hover:bg-[#C45320] text-white text-[11px] font-bold rounded-lg transition-colors cursor-pointer disabled:opacity-50 shadow-2xs"
+                      >
+                        {b.syncing ? "Syncing Data Lake..." : "Force Sync Now"}
+                      </button>
+                    ) : (
+                      <span className="font-mono font-medium text-[#78716C]">{b.latency}</span>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -187,12 +277,12 @@ export default function AdminDashboard({ user }) {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="font-semibold text-[#1C1917] text-base">User & Role Management</h3>
-              <span className="px-2 py-0.5 rounded-full bg-[#FEF0E7] text-[#E8602A] text-xs font-semibold">
+              <h3 className="font-bold text-[#1C1917] text-base">User & Role-Based Access Control (RBAC)</h3>
+              <span className="px-2.5 py-0.5 rounded-full bg-[#FEF0E7] text-[#E8602A] text-xs font-bold">
                 {usersList.length} Active Accounts
               </span>
             </div>
-            <p className="text-xs text-[#78716C] mt-0.5">Control departmental access, security permissions, and assign system privileges.</p>
+            <p className="text-xs text-[#78716C] mt-0.5">Control departmental access, security permissions, and assign 3-Tier System Privileges.</p>
           </div>
 
           <div className="flex items-center gap-2">
@@ -210,17 +300,17 @@ export default function AdminDashboard({ user }) {
             <select
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value)}
-              className="text-xs text-[#78716C] bg-[#F5F5F4] border border-[#E7E5E4] rounded-lg px-2.5 py-1.5 outline-none focus:border-[#E8602A]"
+              className="text-xs text-[#44403C] font-medium bg-[#F5F5F4] border border-[#E7E5E4] rounded-lg px-2.5 py-1.5 outline-none focus:border-[#E8602A] cursor-pointer"
             >
               <option value="All">All Roles</option>
               <option value="Government Officer">Government Officer</option>
+              <option value="Reviewer / Monitoring Officer">Reviewer / Monitoring Officer</option>
               <option value="Project Administrator">Project Administrator</option>
-              <option value="Analyst">Analyst</option>
             </select>
 
             <button
               onClick={() => setShowAddModal(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-[#1C1917] hover:bg-[#44403C] text-white text-xs font-medium rounded-lg transition-colors shadow-sm cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-[#1C1917] hover:bg-[#44403C] text-white text-xs font-semibold rounded-lg transition-colors shadow-sm cursor-pointer"
             >
               <Plus size={13} /> Add User
             </button>
@@ -230,13 +320,13 @@ export default function AdminDashboard({ user }) {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="border-b border-[#F5F5F4] text-[#A8A29E] font-medium">
-                <th className="pb-3 pl-2">User Details</th>
-                <th className="pb-3">Department / Ministry</th>
-                <th className="pb-3">Assigned Role</th>
-                <th className="pb-3">Status</th>
-                <th className="pb-3">Last Active</th>
-                <th className="pb-3 text-right pr-2">Action</th>
+              <tr className="border-b border-[#F5F5F4] text-[#78716C] font-semibold bg-[#FAF7F4]/50">
+                <th className="py-2.5 pl-2">User Details</th>
+                <th className="py-2.5">Department / Ministry</th>
+                <th className="py-2.5">Assigned Role</th>
+                <th className="py-2.5">Status</th>
+                <th className="py-2.5">Last Active</th>
+                <th className="py-2.5 text-right pr-2">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#F5F5F4]">
@@ -244,21 +334,21 @@ export default function AdminDashboard({ user }) {
                 <tr key={u.id} className="hover:bg-[#FAF7F4]/60 transition-colors">
                   <td className="py-3 pl-2">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-7 h-7 rounded-full bg-[#FEF0E7] text-[#E8602A] font-bold flex items-center justify-center text-xs">
-                        {u.name.split(" ").map(n => n[0]).join("")}
+                      <div className="w-7 h-7 rounded-full bg-[#FEF0E7] text-[#E8602A] font-black flex items-center justify-center text-xs">
+                        {u.name.split(" ").map(n => n[0]).slice(0, 2).join("")}
                       </div>
                       <div>
-                        <p className="font-semibold text-[#1C1917]">{u.name}</p>
-                        <p className="text-[#A8A29E] text-[11px]">{u.email}</p>
+                        <p className="font-bold text-[#1C1917]">{u.name}</p>
+                        <p className="text-[#A8A29E] text-[11px] font-mono">{u.email}</p>
                       </div>
                     </div>
                   </td>
                   <td className="py-3 text-[#44403C] font-medium">{u.department}</td>
                   <td className="py-3">
-                    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-medium ${
+                    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold ${
                       u.role === "Project Administrator"
                         ? "bg-purple-50 text-purple-700 border border-purple-200"
-                        : u.role === "Analyst"
+                        : u.role === "Reviewer / Monitoring Officer"
                         ? "bg-blue-50 text-blue-700 border border-blue-200"
                         : "bg-emerald-50 text-emerald-700 border border-emerald-200"
                     }`}>
@@ -266,15 +356,13 @@ export default function AdminDashboard({ user }) {
                     </span>
                   </td>
                   <td className="py-3">
-                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${
                       u.status === "Active"
                         ? "bg-emerald-100 text-emerald-800"
-                        : u.status === "Pending"
-                        ? "bg-amber-100 text-amber-800"
                         : "bg-red-100 text-red-800"
                     }`}>
                       <span className={`w-1.5 h-1.5 rounded-full ${
-                        u.status === "Active" ? "bg-emerald-600" : u.status === "Pending" ? "bg-amber-600" : "bg-red-600"
+                        u.status === "Active" ? "bg-emerald-600" : "bg-red-600"
                       }`} />
                       {u.status}
                     </span>
@@ -283,7 +371,7 @@ export default function AdminDashboard({ user }) {
                   <td className="py-3 text-right pr-2">
                     <button
                       onClick={() => toggleUserStatus(u.id)}
-                      className={`text-xs font-medium px-2.5 py-1 rounded-lg border transition-colors cursor-pointer ${
+                      className={`text-xs font-semibold px-2.5 py-1 rounded-lg border transition-colors cursor-pointer ${
                         u.status === "Active"
                           ? "border-red-200 text-red-600 hover:bg-red-50"
                           : "border-emerald-200 text-emerald-600 hover:bg-emerald-50"
@@ -302,41 +390,48 @@ export default function AdminDashboard({ user }) {
       {/* Grid: Server Infrastructure & Audit Logs */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* System Infrastructure Monitor */}
-        <div className="bg-white rounded-2xl p-5 border border-[#E7E5E4] shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3 className="font-semibold text-[#1C1917] text-base">Server & Service Health</h3>
-              <p className="text-xs text-[#78716C] mt-0.5">Live telemetry of backend ML clusters and databases.</p>
-            </div>
-            <button className="p-1.5 text-[#78716C] hover:text-[#1C1917] hover:bg-[#F5F5F4] rounded-lg">
-              <RefreshCw size={14} />
-            </button>
-          </div>
-
-          <div className="space-y-3">
-            {systemNodes.map((node, i) => (
-              <div key={i} className="p-3 rounded-xl border border-[#F5F5F4] bg-[#FAF7F4]/50 hover:bg-[#FAF7F4] transition-colors">
-                <div className="flex items-center justify-between mb-1.5">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                    <p className="text-xs font-bold text-[#1C1917]">{node.name}</p>
-                  </div>
-                  <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                    {node.status} ({node.uptime})
-                  </span>
-                </div>
-                <div className="flex items-center justify-between text-[11px] text-[#78716C] mb-1">
-                  <span>Cluster: {node.type}</span>
-                  <span>Memory: {node.memory}</span>
-                </div>
-                <ProgressBar
-                  value={parseInt(node.load)}
-                  color={parseInt(node.load) > 70 ? "danger" : parseInt(node.load) > 40 ? "warning" : "accent"}
-                  height="h-1"
-                  animate
-                />
+        <div className="bg-white rounded-2xl p-5 border border-[#E7E5E4] shadow-sm flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="font-bold text-[#1C1917] text-base">Server & AI Cluster Health</h3>
+                <p className="text-xs text-[#78716C] mt-0.5">Live telemetry of backend ML clusters and PostgreSQL data lake.</p>
               </div>
-            ))}
+              <button
+                onClick={handleRetrainModels}
+                disabled={isRetraining}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-[#1C1917] hover:bg-[#44403C] text-white text-xs font-semibold rounded-xl transition-all cursor-pointer disabled:opacity-50 shadow-2xs"
+              >
+                <Cpu size={13} className={isRetraining ? "animate-spin" : ""} />
+                {isRetraining ? "Retraining Models..." : "Retrain AI Ensemble"}
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              {initialSystemNodes.map((node, i) => (
+                <div key={i} className="p-3 rounded-xl border border-[#F5F5F4] bg-[#FAF7F4]/50 hover:bg-[#FAF7F4] transition-colors">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                      <p className="text-xs font-bold text-[#1C1917]">{node.name}</p>
+                    </div>
+                    <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                      {node.status} ({node.uptime})
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-[11px] text-[#78716C] mb-1 font-medium">
+                    <span>Cluster: {node.type}</span>
+                    <span>Memory: {node.memory}</span>
+                  </div>
+                  <ProgressBar
+                    value={parseInt(node.load)}
+                    color={parseInt(node.load) > 70 ? "danger" : parseInt(node.load) > 40 ? "warning" : "accent"}
+                    height="h-1"
+                    animate
+                  />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -344,28 +439,34 @@ export default function AdminDashboard({ user }) {
         <div className="bg-white rounded-2xl p-5 border border-[#E7E5E4] shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="font-semibold text-[#1C1917] text-base">Security & Audit Trails</h3>
-              <p className="text-xs text-[#78716C] mt-0.5">Immutable audit records for compliance and tracing.</p>
+              <h3 className="font-bold text-[#1C1917] text-base">Security & Audit Trails (CERT-In)</h3>
+              <p className="text-xs text-[#78716C] mt-0.5">Immutable audit records for compliance, RBAC, and ML traceability.</p>
             </div>
-            <span className="text-xs text-[#E8602A] font-semibold cursor-pointer hover:underline">View All Logs</span>
+            <span className="text-xs text-[#E8602A] font-bold">Live Stream</span>
           </div>
 
-          <div className="divide-y divide-[#F5F5F4]">
-            {auditLogs.map((log) => (
-              <div key={log.id} className="py-3 flex items-start justify-between gap-3">
-                <div className="flex items-start gap-2.5">
-                  <div className={`p-1.5 rounded-lg mt-0.5 ${
-                    log.status === "Warning" ? "bg-amber-100 text-amber-700" : "bg-emerald-100 text-emerald-700"
-                  }`}>
-                    {log.status === "Warning" ? <AlertTriangle size={13} /> : <CheckCircle size={13} />}
+          <div className="space-y-2.5">
+            {auditLogList.map((log) => (
+              <div key={log.id} className="p-3 rounded-xl border border-[#E7E5E4] bg-[#FAF7F4] flex items-center justify-between">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-[10px] font-bold text-[#E8602A]">{log.id}</span>
+                    <p className="text-xs font-bold text-[#1C1917]">{log.action}</p>
                   </div>
-                  <div>
-                    <p className="text-xs font-semibold text-[#1C1917]">{log.action}</p>
-                    <p className="text-[11px] text-[#78716C]">Target: <span className="font-medium text-[#44403C]">{log.target}</span></p>
-                    <p className="text-[10px] text-[#A8A29E]">By: {log.actor} · ID: {log.id}</p>
-                  </div>
+                  <p className="text-[11px] text-[#78716C] mt-0.5">
+                    Target: <strong>{log.target}</strong> · Actor: {log.actor}
+                  </p>
                 </div>
-                <span className="text-[11px] text-[#A8A29E] font-medium flex-shrink-0">{log.time}</span>
+                <div className="text-right">
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
+                    log.status === "Success" ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-amber-50 text-amber-700 border border-amber-200"
+                  }`}>
+                    {log.status}
+                  </span>
+                  <p className="text-[10px] text-[#A8A29E] mt-1 flex items-center justify-end gap-1">
+                    <Clock size={10} /> {log.time}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
@@ -374,72 +475,74 @@ export default function AdminDashboard({ user }) {
 
       {/* Add User Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-[#E7E5E4]">
-            <h3 className="text-base font-bold text-[#1C1917] mb-1">Provision New System Account</h3>
-            <p className="text-xs text-[#78716C] mb-4">Assign role credentials and departmental scope.</p>
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
+          <div className="bg-white rounded-3xl p-6 w-full max-w-md border border-[#E7E5E4] shadow-xl">
+            <h3 className="font-bold text-[#1C1917] text-base mb-1">Provision Official User Account</h3>
+            <p className="text-xs text-[#78716C] mb-4">Assign 3-Tier access privileges and administrative department.</p>
 
-            <form onSubmit={handleAddUser} className="space-y-3 text-xs">
+            <form onSubmit={handleAddUser} className="space-y-3.5">
               <div>
-                <label className="block font-medium text-[#44403C] mb-1">Full Name</label>
+                <label className="block text-xs font-semibold text-[#44403C] mb-1">Full Name & Title</label>
                 <input
                   type="text"
+                  required
+                  placeholder="e.g. Dr. Rajesh Kumar (IAS)"
                   value={newName}
                   onChange={e => setNewName(e.target.value)}
-                  placeholder="e.g. Dr. Ramesh Gupta"
-                  required
-                  className="w-full p-2.5 rounded-xl border border-[#E7E5E4] bg-[#FAF7F4] text-[#1C1917] outline-none focus:border-[#E8602A]"
+                  className="w-full p-2.5 text-xs bg-[#FAF7F4] border border-[#E7E5E4] rounded-xl outline-none focus:border-[#E8602A] text-[#1C1917]"
                 />
               </div>
 
               <div>
-                <label className="block font-medium text-[#44403C] mb-1">Official Government Email</label>
+                <label className="block text-xs font-semibold text-[#44403C] mb-1">Official Gov Email Address</label>
                 <input
                   type="email"
+                  required
+                  placeholder="e.g. officer.name@mospi.gov.in"
                   value={newEmail}
                   onChange={e => setNewEmail(e.target.value)}
-                  placeholder="ramesh.g@gov.in"
-                  required
-                  className="w-full p-2.5 rounded-xl border border-[#E7E5E4] bg-[#FAF7F4] text-[#1C1917] outline-none focus:border-[#E8602A]"
+                  className="w-full p-2.5 text-xs bg-[#FAF7F4] border border-[#E7E5E4] rounded-xl outline-none focus:border-[#E8602A] text-[#1C1917]"
                 />
               </div>
 
               <div>
-                <label className="block font-medium text-[#44403C] mb-1">Assigned Role</label>
+                <label className="block text-xs font-semibold text-[#44403C] mb-1">Assigned 3-Tier Role</label>
                 <select
                   value={newRole}
                   onChange={e => setNewRole(e.target.value)}
-                  className="w-full p-2.5 rounded-xl border border-[#E7E5E4] bg-[#FAF7F4] text-[#1C1917] outline-none focus:border-[#E8602A]"
+                  className="w-full p-2.5 text-xs bg-[#FAF7F4] border border-[#E7E5E4] rounded-xl outline-none focus:border-[#E8602A] text-[#1C1917] cursor-pointer"
                 >
-                  <option value="Government Officer">Government Officer (Monitoring & Escalations)</option>
-                  <option value="Analyst">Analyst (Statistical & ML Modeling)</option>
-                  <option value="Project Administrator">Project Administrator (System & Ingestion)</option>
+                  <option value="Government Officer">Government Officer</option>
+                  <option value="Reviewer / Monitoring Officer">Reviewer / Monitoring Officer</option>
+                  <option value="Project Administrator">Project Administrator</option>
                 </select>
               </div>
 
               <div>
-                <label className="block font-medium text-[#44403C] mb-1">Ministry / Division</label>
+                <label className="block text-xs font-semibold text-[#44403C] mb-1">Administrative Ministry / Agency</label>
                 <input
                   type="text"
+                  required
+                  placeholder="e.g. Ministry of Road Transport & Highways"
                   value={newDept}
                   onChange={e => setNewDept(e.target.value)}
-                  className="w-full p-2.5 rounded-xl border border-[#E7E5E4] bg-[#FAF7F4] text-[#1C1917] outline-none focus:border-[#E8602A]"
+                  className="w-full p-2.5 text-xs bg-[#FAF7F4] border border-[#E7E5E4] rounded-xl outline-none focus:border-[#E8602A] text-[#1C1917]"
                 />
               </div>
 
-              <div className="flex gap-2 pt-3">
+              <div className="flex gap-2.5 pt-2">
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="flex-1 py-2.5 rounded-xl border border-[#E7E5E4] text-[#78716C] hover:bg-[#F5F5F4] font-semibold"
+                  className="flex-1 py-2.5 bg-[#F5F5F4] hover:bg-[#E7E5E4] text-[#78716C] font-semibold rounded-xl text-xs transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 rounded-xl bg-[#1C1917] hover:bg-[#44403C] text-white font-semibold shadow-xs"
+                  className="flex-1 py-2.5 bg-[#1C1917] hover:bg-[#44403C] text-white font-semibold rounded-xl text-xs transition-colors cursor-pointer shadow-sm"
                 >
-                  Create User
+                  Provision User
                 </button>
               </div>
             </form>

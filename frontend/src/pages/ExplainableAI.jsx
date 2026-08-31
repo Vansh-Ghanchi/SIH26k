@@ -1,9 +1,10 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   ArrowLeft, Lightbulb, AlertTriangle, CheckCircle2, Clock,
   Search, ShieldAlert, FileText, Send, Calendar, CheckSquare,
-  Sparkles, ExternalLink, HelpCircle
+  Sparkles, ExternalLink, HelpCircle, Sliders, TrendingDown,
+  IndianRupee, Zap, ArrowRight
 } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -11,6 +12,7 @@ import {
 } from "recharts";
 import Layout from "../components/Layout";
 import { projects } from "../data/projects";
+import { apiService } from "../services/api";
 
 export default function ExplainableAI({ user }) {
   const navigate = useNavigate();
@@ -18,13 +20,39 @@ export default function ExplainableAI({ user }) {
   const initialProjectId = searchParams.get("id") || (projects[0]?.id || "615186");
 
   const [selectedId, setSelectedId] = useState(initialProjectId);
-  const [searchFilter, setSearchFilter] = useState("");
   const [toastMsg, setToastMsg] = useState("");
+
+  // What-If Simulation Sliders State
+  const [deltaLand, setDeltaLand] = useState(15);
+  const [deltaVelocity, setDeltaVelocity] = useState(8);
+  const [deltaInflation, setDeltaInflation] = useState(-3);
+  const [simResult, setSimResult] = useState(null);
+  const [isSimulating, setIsSimulating] = useState(false);
 
   // Get active project
   const selectedProject = useMemo(() => {
     return projects.find(p => String(p.id) === String(selectedId)) || projects[0];
   }, [selectedId]);
+
+  // Recalculate What-If Simulation on slider change or project switch
+  useEffect(() => {
+    const runSimulation = async () => {
+      if (!selectedProject) return;
+      setIsSimulating(true);
+      const res = await apiService.simulateWhatIf({
+        project_id: selectedProject.id,
+        baseScore: selectedProject.riskScore || selectedProject.overallRisk || 68,
+        cost: selectedProject.revisedCostCr || selectedProject.originalCostCr || 1200,
+        delta_land_acquired_pct: deltaLand,
+        delta_progress_velocity: deltaVelocity,
+        delta_material_inflation: deltaInflation
+      });
+      setSimResult(res);
+      setIsSimulating(false);
+    };
+
+    runSimulation();
+  }, [selectedProject, deltaLand, deltaVelocity, deltaInflation]);
 
   // Compute dynamic SHAP feature contributions based on real project parameters
   const dynamicShapData = useMemo(() => {
@@ -239,6 +267,168 @@ export default function ExplainableAI({ user }) {
                 </div>
               ))}
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 🚀 NEW: WHAT-IF POLICY INTERVENTION & SIMULATION SANDBOX */}
+      <div className="bg-gradient-to-br from-stone-900 via-stone-800 to-stone-900 rounded-3xl p-6 mb-5 text-white shadow-lg border border-stone-700">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-6 pb-4 border-b border-stone-700/80">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-[#E8602A] flex items-center justify-center text-white shadow-md">
+              <Sliders size={20} />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="font-black text-sm text-white tracking-wide">Interactive What-If Policy Intervention Simulator</h3>
+                <span className="text-[10px] font-bold bg-[#E8602A]/20 text-[#FEF0E7] border border-[#E8602A]/40 px-2 py-0.5 rounded-full">
+                  Real-Time Decision Engine
+                </span>
+              </div>
+              <p className="text-xs text-stone-300 mt-0.5">
+                Simulate executive policy decisions to forecast risk mitigation, budget savings, and schedule recovery.
+              </p>
+            </div>
+          </div>
+          <div className="text-xs font-mono text-stone-400 bg-stone-800/80 px-3 py-1.5 rounded-xl border border-stone-700">
+            Target: <strong>{selectedProject.name.slice(0, 30)}...</strong>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Sliders Control Panel */}
+          <div className="lg:col-span-7 space-y-4">
+            {/* Slider 1: Land Acquisition */}
+            <div className="bg-stone-800/60 border border-stone-700 p-4 rounded-2xl">
+              <div className="flex justify-between items-center mb-2">
+                <label className="text-xs font-bold text-stone-200 flex items-center gap-1.5">
+                  <Zap size={14} className="text-[#E8602A]" /> Expedited Land Handover & Clearances
+                </label>
+                <span className="text-xs font-mono font-bold text-emerald-400">+{deltaLand}%</span>
+              </div>
+              <input
+                type="range"
+                min="0"
+                max="30"
+                step="5"
+                value={deltaLand}
+                onChange={e => setDeltaLand(Number(e.target.value))}
+                className="w-full h-1.5 bg-stone-700 rounded-lg appearance-none cursor-pointer accent-[#E8602A]"
+              />
+              <div className="flex justify-between text-[10px] text-stone-400 mt-1">
+                <span>Baseline (+0%)</span>
+                <span>Inter-departmental Taskforce (+15%)</span>
+                <span>Fast-track Handover (+30%)</span>
+              </div>
+            </div>
+
+            {/* Slider 2: Progress Velocity */}
+            <div className="bg-stone-800/60 border border-stone-700 p-4 rounded-2xl">
+              <div className="flex justify-between items-center mb-2">
+                <label className="text-xs font-bold text-stone-200 flex items-center gap-1.5">
+                  <TrendingDown size={14} className="text-blue-400" /> Contractor Monthly Progress Velocity Boost
+                </label>
+                <span className="text-xs font-mono font-bold text-blue-400">+{deltaVelocity}% / Mo</span>
+              </div>
+              <input
+                type="range"
+                min="0"
+                max="20"
+                step="2"
+                value={deltaVelocity}
+                onChange={e => setDeltaVelocity(Number(e.target.value))}
+                className="w-full h-1.5 bg-stone-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
+              />
+              <div className="flex justify-between text-[10px] text-stone-400 mt-1">
+                <span>Current Pace (+0%)</span>
+                <span>Double Shift Work (+10%)</span>
+                <span>Triple Shift Construction (+20%)</span>
+              </div>
+            </div>
+
+            {/* Slider 3: Material Inflation */}
+            <div className="bg-stone-800/60 border border-stone-700 p-4 rounded-2xl">
+              <div className="flex justify-between items-center mb-2">
+                <label className="text-xs font-bold text-stone-200 flex items-center gap-1.5">
+                  <IndianRupee size={14} className="text-amber-400" /> Material Price Stabilization / Bulk Procurement
+                </label>
+                <span className={`text-xs font-mono font-bold ${deltaInflation < 0 ? "text-emerald-400" : "text-red-400"}`}>
+                  {deltaInflation > 0 ? `+${deltaInflation}` : deltaInflation}%
+                </span>
+              </div>
+              <input
+                type="range"
+                min="-10"
+                max="10"
+                step="1"
+                value={deltaInflation}
+                onChange={e => setDeltaInflation(Number(e.target.value))}
+                className="w-full h-1.5 bg-stone-700 rounded-lg appearance-none cursor-pointer accent-amber-500"
+              />
+              <div className="flex justify-between text-[10px] text-stone-400 mt-1">
+                <span>-10% (Central Bulk Tender)</span>
+                <span>0% (Market Baseline)</span>
+                <span>+10% (High Inflation)</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Real-Time Simulation Results Panel */}
+          <div className="lg:col-span-5 bg-stone-800/80 border border-stone-700 rounded-2xl p-5 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-xs font-bold text-stone-300 uppercase tracking-wider">Forecasted Policy Impact</span>
+                <span className="text-[11px] font-bold text-emerald-400 bg-emerald-950/80 border border-emerald-600/50 px-2.5 py-0.5 rounded-full">
+                  -{simResult?.risk_mitigation_pct || 28}% Risk Reduction
+                </span>
+              </div>
+
+              {/* Comparative Scores */}
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                <div className="p-3 bg-stone-900/80 rounded-xl border border-stone-700 text-center">
+                  <p className="text-[11px] text-stone-400">Baseline Score</p>
+                  <p className="text-lg font-black text-red-400 font-mono mt-0.5">{simResult?.baseline_risk_score || 68} / 100</p>
+                  <span className="text-[10px] text-stone-400">{selectedProject.riskLevel} Risk</span>
+                </div>
+                <div className="p-3 bg-stone-900/80 rounded-xl border border-emerald-700/60 text-center">
+                  <p className="text-[11px] text-emerald-400 font-semibold">Simulated Outcome</p>
+                  <p className="text-lg font-black text-emerald-400 font-mono mt-0.5">{simResult?.simulated_risk_score || 46} / 100</p>
+                  <span className="text-[10px] text-emerald-300 font-medium">{simResult?.simulated_risk_level || "Moderate"} Risk</span>
+                </div>
+              </div>
+
+              {/* Impact Metrics */}
+              <div className="space-y-2 mb-4">
+                <div className="flex justify-between items-center text-xs p-2.5 bg-stone-900/60 rounded-xl border border-stone-700/60">
+                  <span className="text-stone-300 flex items-center gap-1.5">
+                    <IndianRupee size={13} className="text-emerald-400" /> Projected Public Cost Savings:
+                  </span>
+                  <span className="font-mono font-bold text-emerald-400 text-xs">
+                    ₹{simResult?.projected_cost_saving_cr || 128} Cr
+                  </span>
+                </div>
+                <div className="flex justify-between items-center text-xs p-2.5 bg-stone-900/60 rounded-xl border border-stone-700/60">
+                  <span className="text-stone-300 flex items-center gap-1.5">
+                    <Clock size={13} className="text-blue-400" /> Schedule Delay Mitigated:
+                  </span>
+                  <span className="font-mono font-bold text-blue-400 text-xs">
+                    {simResult?.months_saved || 5} Months Recovered
+                  </span>
+                </div>
+              </div>
+
+              <p className="text-[11px] text-stone-300 italic leading-relaxed bg-stone-900/80 p-3 rounded-xl border border-stone-700">
+                "{simResult?.policy_synthesis || 'Accelerating land handover and increasing progress velocity lowers overrun probability significantly.'}"
+              </p>
+            </div>
+
+            <button
+              onClick={() => handleAction(`Adopt Simulated Policy Action Package (-${simResult?.risk_mitigation_pct || 28}% Risk)`)}
+              className="mt-4 w-full py-2.5 bg-[#E8602A] hover:bg-[#C45320] text-white text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md"
+            >
+              <span>Adopt Simulated Policy Package</span>
+              <ArrowRight size={14} />
+            </button>
           </div>
         </div>
       </div>

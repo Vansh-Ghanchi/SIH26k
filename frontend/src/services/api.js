@@ -151,5 +151,71 @@ export const apiService = {
       riskTrend: riskTrendData,
       sectorData: sectorData
     };
+  },
+
+  // 7. Live AI Copilot Chat (Connected to FastAPI & Gemini)
+  async chatWithCopilot(message) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/ai-assistant/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message })
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.reply) {
+          return {
+            reply: json.reply,
+            sources: json.sources || ["Google Gemini 1.5 Flash", "MoSPI IPMD Central Data Lake"]
+          };
+        }
+      }
+    } catch (e) {
+      console.warn("[API Service] AI Copilot live API fallback:", e.message);
+    }
+    return null;
+  },
+
+  // 8. What-If Policy Intervention Simulator
+  async simulateWhatIf(payload) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/predictions/simulate-what-if`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.simulation) {
+          return json.simulation;
+        }
+      }
+    } catch (e) {
+      console.warn("[API Service] What-If simulator fallback:", e.message);
+    }
+
+    // Graceful offline mathematical simulation
+    const baseScore = payload.baseScore || 68;
+    const cost = payload.cost || 1200;
+    const deltaLand = Number(payload.delta_land_acquired_pct || 0);
+    const deltaVelocity = Number(payload.delta_progress_velocity || 0);
+    const deltaInflation = Number(payload.delta_material_inflation || 0);
+
+    const totalMitigation = (deltaLand * 0.45 + deltaVelocity * 0.65) - (deltaInflation * 0.40);
+    const simScore = Math.max(12, Math.min(95, Math.round(baseScore - totalMitigation)));
+    const mitPct = Math.max(0, Math.round(((baseScore - simScore) / baseScore) * 100));
+    const costSaving = Math.max(0, Math.round(cost * (mitPct / 100) * 0.18));
+    const monthsSaved = Math.max(0, Math.round((baseScore - simScore) * 0.16));
+
+    return {
+      baseline_risk_score: baseScore,
+      simulated_risk_score: simScore,
+      simulated_risk_level: simScore >= 75 ? "Critical" : simScore >= 50 ? "High" : simScore >= 25 ? "Moderate" : "Low",
+      risk_mitigation_pct: mitPct,
+      projected_cost_saving_cr: costSaving,
+      months_saved: monthsSaved,
+      policy_synthesis: `Intervention mitigates risk by ${mitPct}%, protecting ₹${costSaving} Cr and saving ${monthsSaved} months.`
+    };
   }
 };
+
