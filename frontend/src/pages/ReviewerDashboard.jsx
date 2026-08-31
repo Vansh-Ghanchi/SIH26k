@@ -2,37 +2,31 @@ import { useState } from "react";
 import {
   CheckSquare, AlertTriangle, CheckCircle2, XCircle, ArrowRight,
   ShieldCheck, FileSpreadsheet, Eye, MessageSquare, Clock, Filter,
-  FolderPlus, Building2, MapPin, FileCheck2, Send, HelpCircle
+  FolderPlus, Building2, MapPin, FileCheck2, Send, Download, ArrowDownToLine
 } from "lucide-react";
 import Layout from "../components/Layout";
 import StatCard from "../components/StatCard";
 import ProgressBar from "../components/ProgressBar";
 
-const reviewerKpis = [
-  {
-    title: "Pending Registrations", value: "3", subtitle: "New project proposals",
-    icon: FolderPlus, accentColor: "orange", change: "Requires review", changeType: "neutral"
-  },
-  {
-    title: "Pending Monthly Updates", value: "6", subtitle: "CUF Submissions to verify",
-    icon: Clock, accentColor: "orange", change: "April 2026 Cycle", changeType: "neutral"
-  },
-  {
-    title: "Approved This Month", value: "34", subtitle: "Ingested into PAIMANA Data Lake",
-    icon: CheckCircle2, accentColor: "green", change: "+16 this week", changeType: "up"
-  },
-  {
-    title: "High Risk Escalations", value: "5", subtitle: "Escalated to MoSPI Authority",
-    icon: AlertTriangle, accentColor: "red", change: "Critical notice issued", changeType: "up"
-  },
-];
+// Client-side file downloader
+function triggerDownload(filename, content, mimeType = "text/plain;charset=utf-8;") {
+  const blob = new Blob([content], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.setAttribute("href", url);
+  link.setAttribute("download", filename);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
 
-const mockPendingRegistrations = [
+const initialRegistrations = [
   {
     id: "REG-2026-089",
     name: "Vadodara-Mumbai Expressway Phase 3 (South Corridor)",
     ministry: "Ministry of Road Transport & Highways",
-    sector: "Transport & Logistics",
+    sector: "Road Transport & Highways",
     agency: "National Highways Authority of India (NHAI)",
     state: "Gujarat / Maharashtra",
     approvedCost: 4850,
@@ -42,13 +36,13 @@ const mockPendingRegistrations = [
     submittedBy: "Dr. Rajesh Kumar (Project Officer)",
     submissionDate: "Today, 09:15 AM",
     dprDoc: "DPR-NHAI-VM3-Final.pdf",
-    description: "Construction of 8-lane access-controlled greenfield expressway connecting South Gujarat to MMR border."
+    description: "Construction of 8-lane access-controlled greenfield expressway connecting South Gujarat to MMR border with 4 major river bridges and automated tolling."
   },
   {
     id: "REG-2026-090",
     name: "Brahmaputra River Multi-Modal Logistics Hub",
     ministry: "Ministry of Ports, Shipping and Waterways",
-    sector: "Waterways & Logistics",
+    sector: "Ports & Shipping",
     agency: "Inland Waterways Authority of India (IWAI)",
     state: "Assam",
     approvedCost: 1420,
@@ -58,13 +52,13 @@ const mockPendingRegistrations = [
     submittedBy: "Sanjay Barua (IWAI Lead)",
     submissionDate: "Yesterday, 03:40 PM",
     dprDoc: "IWAI-Brahmaputra-Hub-v2.pdf",
-    description: "Integrated riverine terminal with rail and highway connectivity at Pandu port."
+    description: "Integrated riverine cargo terminal with rail sidings, container freight station, and highway connectivity at Pandu Port."
   },
   {
     id: "REG-2026-091",
     name: "AIIMS Sambalpur 750-Bed Super Specialty Hospital",
     ministry: "Ministry of Health and Family Welfare",
-    sector: "Social Infrastructure",
+    sector: "Social & Health Infrastructure",
     agency: "Central Public Works Department (CPWD)",
     state: "Odisha",
     approvedCost: 1180,
@@ -74,22 +68,22 @@ const mockPendingRegistrations = [
     submittedBy: "M. K. Tripathy (CPWD)",
     submissionDate: "2 days ago",
     dprDoc: "CPWD-AIIMS-SBL-DPR.pdf",
-    description: "Tertiary healthcare and medical college infrastructure under PMSSY Phase VII."
+    description: "Tertiary healthcare and medical college infrastructure under PMSSY Phase VII with emergency trauma care and research wings."
   },
 ];
 
-const mockPendingMonthlyUpdates = [
+const initialMonthlyUpdates = [
   {
     id: "SUB-101",
     projectName: "NH-48 Highway Expansion (Gujarat)",
     agency: "NHAI North Corridor",
-    ministry: "Ministry of Road Transport",
+    ministry: "Ministry of Road Transport & Highways",
     submissionDate: "Today, 10:30 AM",
     submittedBy: "Dr. Rajesh Kumar",
     prevSnapshot: { progress: 40, exp: 1420, revisedCost: 2400, land: 68 },
     currSubmission: { progress: 45, exp: 1650, revisedCost: 2640, land: 72 },
-    delayReason: "Utility shifting delay in section 4 + cost revision due to steel price index.",
-    discrepancyFlag: "Cost revised upwards (+₹240 Cr) · Land clearance hold noted."
+    delayReason: "Utility shifting delay in section 4 + cost revision due to steel and bitumen price index escalation.",
+    discrepancyFlag: "Cost revised upwards (+₹240 Cr) · Land clearance hold noted in Section 4."
   },
   {
     id: "SUB-102",
@@ -100,7 +94,7 @@ const mockPendingMonthlyUpdates = [
     submittedBy: "Arun Verma",
     prevSnapshot: { progress: 58, exp: 3200, revisedCost: 4800, land: 88 },
     currSubmission: { progress: 62, exp: 3450, revisedCost: 4800, land: 91 },
-    delayReason: "On track for revised milestone Q3.",
+    delayReason: "On track for revised commissioning milestone Q3 FY26-27.",
     discrepancyFlag: null
   },
   {
@@ -112,31 +106,79 @@ const mockPendingMonthlyUpdates = [
     submittedBy: "Sunita Rao",
     prevSnapshot: { progress: 51, exp: 4100, revisedCost: 6200, land: 82 },
     currSubmission: { progress: 53, exp: 4480, revisedCost: 6750, land: 84 },
-    delayReason: "Monsoon landslide damage near powerhouse intake gallery.",
+    delayReason: "Monsoon landslide damage near powerhouse intake gallery requiring reinforced rock anchoring.",
     discrepancyFlag: "Expenditure increased faster than physical milestone (+₹380 Cr vs +2% progress)."
   },
 ];
 
 export default function ReviewerDashboard({ user }) {
-  const [activeTab, setActiveTab] = useState("registrations"); // 'registrations' | 'monthly_updates'
+  const [activeTab, setActiveTab] = useState("registrations");
   
   // Registration queue state
-  const [regQueue, setRegQueue] = useState(mockPendingRegistrations);
-  const [selectedReg, setSelectedReg] = useState(mockPendingRegistrations[0]);
+  const [regQueue, setRegQueue] = useState(initialRegistrations);
+  const [selectedReg, setSelectedReg] = useState(initialRegistrations[0]);
 
   // Monthly updates queue state
-  const [updateQueue, setUpdateQueue] = useState(mockPendingMonthlyUpdates);
-  const [selectedUpdate, setSelectedUpdate] = useState(mockPendingMonthlyUpdates[0]);
+  const [updateQueue, setUpdateQueue] = useState(initialMonthlyUpdates);
+  const [selectedUpdate, setSelectedUpdate] = useState(initialMonthlyUpdates[0]);
   
+  const [approvedCount, setApprovedCount] = useState(34);
   const [reviewRemarks, setReviewRemarks] = useState("");
   const [toastMsg, setToastMsg] = useState("");
   const [toastType, setToastType] = useState("success");
 
+  // Dynamic DPR document generator
+  const handleDownloadDPR = (reg) => {
+    const dprSummary = `================================================================================
+                    GOVERNMENT OF INDIA - MoSPI / IPMD
+             DETAILED PROJECT REPORT (DPR) FEASIBILITY SUMMARY
+================================================================================
+
+Registration ID:       ${reg.id}
+Project Name:          ${reg.name}
+Administrative Body:   ${reg.ministry}
+Implementing Agency:   ${reg.agency}
+Geographical Region:   ${reg.state}
+
+--------------------------------------------------------------------------------
+1. FINANCIAL SANCTION & SCOPE
+--------------------------------------------------------------------------------
+Approved Project Cost: ₹${reg.approvedCost} Crore
+Initial Land Status:   ${reg.landAcquired}% Acquired & Certified
+Scheduled Start Date:  ${reg.startDate}
+Target Commissioning:  ${reg.targetCompletion}
+
+--------------------------------------------------------------------------------
+2. EXECUTIVE TECHNICAL BRIEF
+--------------------------------------------------------------------------------
+${reg.description}
+
+--------------------------------------------------------------------------------
+3. STATUTORY STATS & CLEARANCES
+--------------------------------------------------------------------------------
+- Environmental & Forest Clearance: Approved Stage-1
+- Nodal NHA / State Land Handover: In Progress (${reg.landAcquired}% Ready)
+- DPR Certification Authority: Central Implementing Directorate
+- Verification Submission: ${reg.submissionDate} by ${reg.submittedBy}
+
+================================================================================
+                    END OF OFFICIAL DPR SUMMARY DOCUMENT
+================================================================================`;
+
+    triggerDownload(`${reg.id}_DPR_Feasibility_Report.txt`, dprSummary);
+    setToastType("success");
+    setToastMsg(`Downloaded Official Feasibility Report for ${reg.id}!`);
+    setTimeout(() => setToastMsg(""), 4000);
+  };
+
   // Registration Actions
   const handleApproveRegistration = (id) => {
+    const approvedReg = regQueue.find(r => r.id === id);
     setRegQueue(prev => prev.filter(r => r.id !== id));
+    setApprovedCount(prev => prev + 1);
     setToastType("success");
-    setToastMsg("Project Registration " + id + " Approved! Assigned PAIMANA Master ID PRJ-" + Math.floor(1000 + Math.random() * 9000));
+    setToastMsg(`Project Registration ${id} Approved! Assigned DRISHTI Master ID: PRJ-${Math.floor(1000 + Math.random() * 9000)}`);
+    setReviewRemarks("");
     if (regQueue.length > 1) {
       setSelectedReg(regQueue.find(r => r.id !== id));
     } else {
@@ -146,13 +188,10 @@ export default function ReviewerDashboard({ user }) {
   };
 
   const handleRejectRegistration = (id) => {
-    if (!reviewRemarks) {
-      alert("Please enter mandatory remarks explaining rejection or required document corrections.");
-      return;
-    }
+    const remarks = reviewRemarks.trim() || "Returned for mandatory land acquisition clearance certification and updated DPR appendices.";
     setRegQueue(prev => prev.filter(r => r.id !== id));
     setToastType("warning");
-    setToastMsg("Project Registration " + id + " sent back to Agency for correction.");
+    setToastMsg(`Project Proposal ${id} returned to Implementing Agency for clarification.`);
     setReviewRemarks("");
     if (regQueue.length > 1) {
       setSelectedReg(regQueue.find(r => r.id !== id));
@@ -165,8 +204,10 @@ export default function ReviewerDashboard({ user }) {
   // Monthly Updates Actions
   const handleApproveUpdate = (id) => {
     setUpdateQueue(prev => prev.filter(q => q.id !== id));
+    setApprovedCount(prev => prev + 1);
     setToastType("success");
-    setToastMsg("CUF Monthly Submission " + id + " Approved! Snapshot ingested into AI Risk Model.");
+    setToastMsg(`CUF Monthly Submission ${id} Verified & Ingested into DRISHTI Data Lake!`);
+    setReviewRemarks("");
     if (updateQueue.length > 1) {
       setSelectedUpdate(updateQueue.find(q => q.id !== id));
     } else {
@@ -176,13 +217,10 @@ export default function ReviewerDashboard({ user }) {
   };
 
   const handleRejectUpdate = (id) => {
-    if (!reviewRemarks) {
-      alert("Please enter mandatory remarks explaining data discrepancies.");
-      return;
-    }
+    const remarks = reviewRemarks.trim() || "Algorithmic progress-vs-expenditure discrepancy flagged. Re-submission required with certified contractor invoices.";
     setUpdateQueue(prev => prev.filter(q => q.id !== id));
     setToastType("warning");
-    setToastMsg("Submission " + id + " returned to Agency Officer for correction.");
+    setToastMsg(`Submission ${id} returned to Agency Officer for discrepancy reconciliation.`);
     setReviewRemarks("");
     if (updateQueue.length > 1) {
       setSelectedUpdate(updateQueue.find(q => q.id !== id));
@@ -196,7 +234,7 @@ export default function ReviewerDashboard({ user }) {
     <Layout
       user={user}
       title="Reviewer & Monitoring Authority Centre"
-      subtitle="Verify new project registrations, audit monthly CUF progress submissions, check discrepancy diffs, and approve snapshots into PAIMANA."
+      subtitle="Verify new project registrations, audit monthly CUF progress submissions, check discrepancy diffs, and approve snapshots into DRISHTI."
       showDateRange={false}
     >
       {/* Toast Notification */}
@@ -208,23 +246,60 @@ export default function ReviewerDashboard({ user }) {
             <CheckCircle2 size={16} className={toastType === "success" ? "text-emerald-600" : "text-amber-600"} />
             {toastMsg}
           </span>
-          <button onClick={() => setToastMsg("")} className="text-stone-600 hover:text-stone-900">✕</button>
+          <button onClick={() => setToastMsg("")} className="text-stone-600 hover:text-stone-900 cursor-pointer font-bold px-1">✕</button>
         </div>
       )}
 
       {/* Top Reviewer KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
-        {reviewerKpis.map((k, i) => (
+        {[
+          {
+            title: "Pending Registrations",
+            value: String(regQueue.length),
+            subtitle: "New project proposals",
+            icon: FolderPlus,
+            accentColor: "orange",
+            change: regQueue.length > 0 ? "Requires review" : "All cleared",
+            changeType: regQueue.length > 0 ? "neutral" : "up"
+          },
+          {
+            title: "Pending Monthly Updates",
+            value: String(updateQueue.length),
+            subtitle: "CUF Submissions to verify",
+            icon: Clock,
+            accentColor: "orange",
+            change: "April 2026 Cycle",
+            changeType: "neutral"
+          },
+          {
+            title: "Approved This Month",
+            value: String(approvedCount),
+            subtitle: "Ingested into DRISHTI Data Lake",
+            icon: CheckCircle2,
+            accentColor: "green",
+            change: "+16 this week",
+            changeType: "up"
+          },
+          {
+            title: "High Risk Escalations",
+            value: "5",
+            subtitle: "Escalated to MoSPI Authority",
+            icon: AlertTriangle,
+            accentColor: "red",
+            change: "Critical notice issued",
+            changeType: "up"
+          },
+        ].map((k, i) => (
           <StatCard key={i} {...k}>
             <div className="mt-3">
               <ProgressBar
-                value={i === 0 ? 40 : i === 1 ? 60 : i === 2 ? 85 : 25}
+                value={i === 0 ? Math.min(100, regQueue.length * 33) : i === 1 ? Math.min(100, updateQueue.length * 33) : i === 2 ? 85 : 25}
                 color={i === 0 || i === 1 ? "warning" : i === 3 ? "danger" : "success"}
                 height="h-1"
                 animate
               />
               <p className="text-xs text-[#A8A29E] mt-1.5 font-medium">
-                {i === 0 ? "3 New proposals" : i === 1 ? "April 2026 Cycle" : i === 2 ? "Sync verified" : "Escalated to Central MoSPI"}
+                {i === 0 ? `${regQueue.length} New proposals` : i === 1 ? "April 2026 Cycle" : i === 2 ? "Sync verified" : "Escalated to Central MoSPI"}
               </p>
             </div>
           </StatCard>
@@ -237,7 +312,7 @@ export default function ReviewerDashboard({ user }) {
           onClick={() => setActiveTab("registrations")}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
             activeTab === "registrations"
-              ? "bg-white text-[#1C1917] shadow-xs"
+              ? "bg-white text-[#1C1917] shadow-xs border border-[#E7E5E4]"
               : "text-[#78716C] hover:text-[#1C1917]"
           }`}
         >
@@ -248,7 +323,7 @@ export default function ReviewerDashboard({ user }) {
           onClick={() => setActiveTab("monthly_updates")}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
             activeTab === "monthly_updates"
-              ? "bg-white text-[#1C1917] shadow-xs"
+              ? "bg-white text-[#1C1917] shadow-xs border border-[#E7E5E4]"
               : "text-[#78716C] hover:text-[#1C1917]"
           }`}
         >
@@ -336,7 +411,12 @@ export default function ReviewerDashboard({ user }) {
                 <p className="text-[#44403C] leading-relaxed">{selectedReg.description}</p>
                 <div className="mt-2 pt-2 border-t border-[#E7E5E4] flex items-center justify-between">
                   <span className="text-[11px] text-[#78716C]">Attached Feasibility Report: <strong>{selectedReg.dprDoc}</strong></span>
-                  <span className="text-[11px] text-[#E8602A] font-semibold cursor-pointer hover:underline">Download DPR →</span>
+                  <button
+                    onClick={() => handleDownloadDPR(selectedReg)}
+                    className="text-[11px] text-[#E8602A] hover:text-[#C45320] font-bold cursor-pointer flex items-center gap-1"
+                  >
+                    <ArrowDownToLine size={12} /> Download DPR Summary →
+                  </button>
                 </div>
               </div>
 
@@ -355,15 +435,15 @@ export default function ReviewerDashboard({ user }) {
                 <div className="flex gap-3 pt-1">
                   <button
                     onClick={() => handleRejectRegistration(selectedReg.id)}
-                    className="flex-1 py-2.5 bg-white border border-red-300 hover:bg-red-50 text-red-700 font-semibold rounded-xl text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                    className="flex-1 py-2.5 bg-white border border-red-300 hover:bg-red-50 text-red-700 font-semibold rounded-xl text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
                   >
                     <XCircle size={14} /> Send Back for Clarification
                   </button>
                   <button
                     onClick={() => handleApproveRegistration(selectedReg.id)}
-                    className="flex-1 py-2.5 bg-[#1C1917] hover:bg-[#44403C] text-white font-semibold rounded-xl text-xs transition-colors flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
+                    className="flex-1 py-2.5 bg-[#1C1917] hover:bg-[#44403C] text-white font-semibold rounded-xl text-xs transition-colors flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer"
                   >
-                    <CheckCircle2 size={14} /> Approve Registration & Assign PAIMANA ID
+                    <CheckCircle2 size={14} /> Approve Registration & Assign DRISHTI ID
                   </button>
                 </div>
               </div>
@@ -376,7 +456,7 @@ export default function ReviewerDashboard({ user }) {
             </div>
             <h3 className="font-bold text-[#1C1917] text-base">All Project Registrations Verified!</h3>
             <p className="text-xs text-[#78716C] mt-1 max-w-sm">
-              All submitted new project proposals have been processed and added to the Central PAIMANA master repository.
+              All submitted new project proposals have been processed and added to the Central DRISHTI master repository.
             </p>
           </div>
         )
@@ -504,13 +584,13 @@ export default function ReviewerDashboard({ user }) {
                 <div className="flex gap-3 pt-1">
                   <button
                     onClick={() => handleRejectUpdate(selectedUpdate.id)}
-                    className="flex-1 py-2.5 bg-white border border-red-300 hover:bg-red-50 text-red-700 font-semibold rounded-xl text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                    className="flex-1 py-2.5 bg-white border border-red-300 hover:bg-red-50 text-red-700 font-semibold rounded-xl text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
                   >
                     <XCircle size={14} /> Send Back for Correction
                   </button>
                   <button
                     onClick={() => handleApproveUpdate(selectedUpdate.id)}
-                    className="flex-1 py-2.5 bg-[#1C1917] hover:bg-[#44403C] text-white font-semibold rounded-xl text-xs transition-colors flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
+                    className="flex-1 py-2.5 bg-[#1C1917] hover:bg-[#44403C] text-white font-semibold rounded-xl text-xs transition-colors flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer"
                   >
                     <CheckCircle2 size={14} /> Approve & Ingest into AI Engine
                   </button>
@@ -525,7 +605,7 @@ export default function ReviewerDashboard({ user }) {
             </div>
             <h3 className="font-bold text-[#1C1917] text-base">All Monthly Submissions Audited!</h3>
             <p className="text-xs text-[#78716C] mt-1 max-w-sm">
-              All monthly CUF data has been audited and ingested into the PAIMANA predictive AI pipeline.
+              All monthly CUF data has been audited and ingested into the DRISHTI predictive AI pipeline.
             </p>
           </div>
         )

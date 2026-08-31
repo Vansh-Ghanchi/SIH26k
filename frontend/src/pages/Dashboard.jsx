@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   FolderOpen, AlertTriangle, Clock, TrendingUp, IndianRupee,
@@ -14,40 +14,20 @@ import StatCard from "../components/StatCard";
 import RiskBadge from "../components/RiskBadge";
 import ProgressBar from "../components/ProgressBar";
 import { alerts } from "../data/alerts";
-import { riskTrendData, sectorData } from "../data/projects";
-
-const kpis = [
-  {
-    title: "Total Projects", value: "1,981", subtitle: "Across 17 Ministries",
-    icon: FolderOpen, accentColor: "orange", change: "April 2026", changeType: "neutral"
-  },
-  {
-    title: "High Risk Projects", value: "245", subtitle: "Immediate escalation",
-    icon: AlertTriangle, accentColor: "red", change: "+18 flagged", changeType: "up"
-  },
-  {
-    title: "Delayed Projects", value: "320", subtitle: "Milestone schedule lag",
-    icon: Clock, accentColor: "red", change: "16.2% portfolio", changeType: "up"
-  },
-  {
-    title: "Cost Overrun Projects", value: "180", subtitle: "Exceeding approved cost",
-    icon: TrendingUp, accentColor: "red", change: "9.1% portfolio", changeType: "up"
-  },
-  {
-    title: "Portfolio Cost", value: "₹42.78L Cr", subtitle: "Original: ₹37.13L Cr",
-    icon: IndianRupee, accentColor: "green", change: "Cumulative Exp: ₹20.36L Cr", changeType: "neutral"
-  },
-];
+import { projects, riskTrendData, sectorData } from "../data/projects";
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-white border border-[#E7E5E4] rounded-xl shadow-sm p-3 text-xs">
-      <p className="font-medium text-[#1C1917] mb-1">{label}</p>
+    <div className="bg-white border border-[#E7E5E4] rounded-xl shadow-md p-3 text-xs">
+      <p className="font-bold text-[#1C1917] mb-1.5">{label}</p>
       {payload.map(p => (
-        <p key={p.name} style={{ color: p.color }} className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full" style={{ background: p.color }} />
-          {p.name}: <span className="font-semibold ml-1">{p.value}</span>
+        <p key={p.name} style={{ color: p.color }} className="flex items-center justify-between gap-4 py-0.5 font-medium">
+          <span className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full" style={{ background: p.color }} />
+            {p.name}:
+          </span>
+          <span className="font-bold font-mono text-[#1C1917]">{p.value}</span>
         </p>
       ))}
     </div>
@@ -59,6 +39,96 @@ export default function Dashboard({ user }) {
   const [actionSuccessMsg, setActionSuccessMsg] = useState("");
   const recentAlerts = alerts.slice(0, 4);
 
+  // Dynamic Portfolio Calculations from 2,092 authentic projects
+  const stats = useMemo(() => {
+    const total = projects.length;
+    const criticalCount = projects.filter(p => p.riskLevel === "Critical").length;
+    const highCount = projects.filter(p => p.riskLevel === "High").length;
+    const highRiskTotal = criticalCount + highCount;
+    
+    const delayedCount = projects.filter(p => p.deadlineRevisionFlag || p.status === "Delayed").length;
+    const costOverrunCount = projects.filter(p => p.costRevisionPct > 0).length;
+    
+    const originalTotalCr = projects.reduce((sum, p) => sum + (p.originalCostCr || p.costValue || 0), 0);
+    const revisedTotalCr = projects.reduce((sum, p) => sum + (p.revisedCostCr || p.costValue || 0), 0);
+    const expTotalCr = projects.reduce((sum, p) => sum + (p.expenditureCr || 0), 0);
+
+    const onTrackCount = total - delayedCount;
+
+    return {
+      total,
+      highRiskTotal,
+      criticalCount,
+      delayedCount,
+      costOverrunCount,
+      originalLakhCr: (originalTotalCr / 100000).toFixed(2),
+      revisedLakhCr: (revisedTotalCr / 100000).toFixed(2),
+      expLakhCr: (expTotalCr / 100000).toFixed(2),
+      onTrackPct: ((onTrackCount / (total || 1)) * 100).toFixed(1),
+      delayedPct: ((delayedCount / (total || 1)) * 100).toFixed(1),
+      costOverrunPct: ((costOverrunCount / (total || 1)) * 100).toFixed(1),
+      highRiskPct: ((highRiskTotal / (total || 1)) * 100).toFixed(1),
+    };
+  }, []);
+
+  const kpis = [
+    {
+      title: "Total Projects",
+      value: stats.total.toLocaleString("en-IN"),
+      subtitle: "Across 17 Ministries",
+      icon: FolderOpen,
+      accentColor: "orange",
+      change: "April 2026 Cycle",
+      changeType: "neutral",
+      progressVal: 100,
+      badgeText: "100% Monitored"
+    },
+    {
+      title: "High Risk Projects",
+      value: stats.highRiskTotal.toLocaleString("en-IN"),
+      subtitle: "Immediate escalation",
+      icon: AlertTriangle,
+      accentColor: "red",
+      change: `${stats.criticalCount} Critical Flagged`,
+      changeType: "up",
+      progressVal: parseFloat(stats.highRiskPct),
+      badgeText: `${stats.highRiskPct}% portfolio`
+    },
+    {
+      title: "Delayed Projects",
+      value: stats.delayedCount.toLocaleString("en-IN"),
+      subtitle: "Milestone schedule lag",
+      icon: Clock,
+      accentColor: "red",
+      change: `${stats.delayedPct}% of total`,
+      changeType: "up",
+      progressVal: parseFloat(stats.delayedPct),
+      badgeText: `${stats.delayedPct}% portfolio`
+    },
+    {
+      title: "Cost Overrun Projects",
+      value: stats.costOverrunCount.toLocaleString("en-IN"),
+      subtitle: "Exceeding approved cost",
+      icon: TrendingUp,
+      accentColor: "red",
+      change: `${stats.costOverrunPct}% portfolio`,
+      changeType: "up",
+      progressVal: parseFloat(stats.costOverrunPct),
+      badgeText: `${stats.costOverrunPct}% portfolio`
+    },
+    {
+      title: "Portfolio Cost",
+      value: `₹${stats.revisedLakhCr}L Cr`,
+      subtitle: `Original: ₹${stats.originalLakhCr}L Cr`,
+      icon: IndianRupee,
+      accentColor: "green",
+      change: `Cumulative Exp: ₹${stats.expLakhCr}L Cr`,
+      changeType: "neutral",
+      progressVal: 82,
+      badgeText: "Across 14 Sectors"
+    },
+  ];
+
   const handleAction = (msg) => {
     setActionSuccessMsg(msg);
     setTimeout(() => setActionSuccessMsg(""), 3500);
@@ -68,7 +138,7 @@ export default function Dashboard({ user }) {
     <Layout
       user={user}
       title="Government Project Monitoring Overview"
-      subtitle="PAIMANA centralized intelligence portal for Central Sector Infrastructure Projects (₹150 Cr+)."
+      subtitle="DRISHTI centralized intelligence portal for Central Sector Infrastructure Projects (₹150 Cr+)."
       showDateRange
       onExport={() => handleAction("Executive Portfolio Summary (April 2026) exported successfully!")}
     >
@@ -86,18 +156,20 @@ export default function Dashboard({ user }) {
       {/* Top Executive Action Bar */}
       <div className="bg-gradient-to-r from-stone-900 to-stone-800 rounded-2xl p-4 text-white shadow-sm mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border border-stone-800">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-[#E8602A] rounded-xl text-white">
+          <div className="p-2.5 bg-[#E8602A] rounded-xl text-white shadow-xs">
             <ShieldAlert size={18} />
           </div>
           <div>
             <h3 className="font-bold text-sm">Executive Officer Actions (MoSPI Division)</h3>
-            <p className="text-xs text-stone-400">245 Critical projects require immediate departmental intervention notices.</p>
+            <p className="text-xs text-stone-400">
+              {stats.highRiskTotal} High/Critical projects require immediate departmental intervention notices.
+            </p>
           </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
           <button
-            onClick={() => handleAction("Emergency Ministry Escalation Notices dispatched to NHAI and RVNL!")}
+            onClick={() => handleAction(`Emergency Ministry Escalation Notices dispatched to NHAI and RVNL for ${stats.criticalCount} projects!`)}
             className="flex items-center gap-1.5 px-3.5 py-2 bg-[#E8602A] hover:bg-[#C45320] text-white text-xs font-semibold rounded-xl transition-colors shadow-xs cursor-pointer"
           >
             <Send size={13} /> Issue Escalation Notice
@@ -117,13 +189,13 @@ export default function Dashboard({ user }) {
           <StatCard key={i} {...k}>
             <div className="mt-3">
               <ProgressBar
-                value={i === 0 ? 72 : i === 1 ? 45 : i === 2 ? 52 : i === 3 ? 38 : 88}
+                value={k.progressVal}
                 color={i === 0 ? "accent" : i === 4 ? "success" : "danger"}
                 height="h-1"
                 animate
               />
               <p className="text-xs text-[#A8A29E] mt-1.5 font-medium">
-                {i === 0 ? "72.5% On-track" : i === 1 ? "12.4% portfolio" : i === 2 ? "16.2% portfolio" : i === 3 ? "9.1% portfolio" : "Across 22 Sectors"}
+                {k.badgeText}
               </p>
             </div>
           </StatCard>
@@ -137,24 +209,23 @@ export default function Dashboard({ user }) {
           <div className="flex items-center justify-between mb-5">
             <div>
               <h3 className="font-semibold text-[#1C1917]">Portfolio Risk Trajectory</h3>
-              <p className="text-xs text-[#A8A29E] mt-0.5">Historical 6-month trends across Central Sector Projects</p>
+              <p className="text-xs text-[#A8A29E] mt-0.5">Historical 9-Month Trajectory (Jul 2025 – Mar 2026)</p>
             </div>
-            <select className="text-xs text-[#78716C] bg-[#F5F5F4] border border-[#E7E5E4] rounded-lg px-2.5 py-1.5 outline-none">
-              <option>Last 6M</option>
-              <option>Last 3M</option>
-              <option>Last 1Y</option>
-            </select>
+            <span className="text-xs font-bold text-[#E8602A] bg-[#FEF0E7] px-2.5 py-1 rounded-lg">
+              9 Months Real Dataset
+            </span>
           </div>
-          <ResponsiveContainer width="100%" height={220}>
-            <LineChart data={riskTrendData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+          <ResponsiveContainer width="100%" height={230}>
+            <LineChart data={riskTrendData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#F5F5F4" />
               <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#A8A29E" }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 11, fill: "#A8A29E" }} axisLine={false} tickLine={false} />
               <Tooltip content={<CustomTooltip />} />
               <Legend wrapperStyle={{ fontSize: "11px", paddingTop: "8px" }} />
-              <Line type="monotone" dataKey="High" stroke="#DC2626" strokeWidth={2} dot={false} />
-              <Line type="monotone" dataKey="Medium" stroke="#D97706" strokeWidth={2} dot={false} />
-              <Line type="monotone" dataKey="Low" stroke="#16A34A" strokeWidth={2} dot={false} />
+              <Line type="monotone" dataKey="critical" name="Critical Risk" stroke="#DC2626" strokeWidth={2.5} dot={{ r: 3 }} />
+              <Line type="monotone" dataKey="high" name="High Risk" stroke="#EA580C" strokeWidth={2} dot={{ r: 2 }} />
+              <Line type="monotone" dataKey="moderate" name="Moderate Risk" stroke="#D97706" strokeWidth={2} dot={{ r: 2 }} />
+              <Line type="monotone" dataKey="low" name="Low Risk" stroke="#16A34A" strokeWidth={2} dot={{ r: 2 }} />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -167,13 +238,13 @@ export default function Dashboard({ user }) {
               <p className="text-xs text-[#A8A29E] mt-0.5">Delayed vs Total Monitored Projects</p>
             </div>
             <button onClick={() => navigate("/analytics")} className="text-xs text-[#E8602A] font-semibold hover:underline">
-              View Radar →
+              View Analytics →
             </button>
           </div>
-          <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={sectorData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+          <ResponsiveContainer width="100%" height={230}>
+            <BarChart data={sectorData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#F5F5F4" vertical={false} />
-              <XAxis dataKey="sector" tick={{ fontSize: 10, fill: "#A8A29E" }} axisLine={false} tickLine={false} />
+              <XAxis dataKey="name" tick={{ fontSize: 10, fill: "#78716C" }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 11, fill: "#A8A29E" }} axisLine={false} tickLine={false} />
               <Tooltip content={<CustomTooltip />} />
               <Legend wrapperStyle={{ fontSize: "11px", paddingTop: "8px" }} />
@@ -191,15 +262,15 @@ export default function Dashboard({ user }) {
           <h3 className="font-semibold text-[#1C1917] mb-3">Portfolio Status Split</h3>
           <div className="grid grid-cols-2 gap-3">
             {[
-              { label: "On Track", value: "1,436", color: "bg-green-500", pct: 73 },
-              { label: "Delayed", value: "320", color: "bg-amber-400", pct: 16 },
-              { label: "Cost Overrun", value: "180", color: "bg-red-500", pct: 9 },
-              { label: "Near Completion", value: "45", color: "bg-[#E8602A]", pct: 2 },
+              { label: "On Track", value: (stats.total - stats.delayedCount).toLocaleString("en-IN"), color: "bg-green-500", pct: stats.onTrackPct },
+              { label: "Delayed", value: stats.delayedCount.toLocaleString("en-IN"), color: "bg-amber-400", pct: stats.delayedPct },
+              { label: "Cost Overrun", value: stats.costOverrunCount.toLocaleString("en-IN"), color: "bg-red-500", pct: stats.costOverrunPct },
+              { label: "Critical", value: stats.criticalCount.toLocaleString("en-IN"), color: "bg-[#E8602A]", pct: ((stats.criticalCount / stats.total) * 100).toFixed(1) },
             ].map(s => (
-              <div key={s.label} className="p-3.5 bg-[#F5F5F4] rounded-xl">
+              <div key={s.label} className="p-3.5 bg-[#FAF7F4] rounded-xl border border-[#F5F5F4]">
                 <div className="flex items-center gap-2 mb-1.5">
                   <span className={`w-2.5 h-2.5 rounded-full ${s.color}`} />
-                  <span className="text-xs text-[#78716C]">{s.label}</span>
+                  <span className="text-xs text-[#78716C] font-medium">{s.label}</span>
                 </div>
                 <p className="text-lg font-bold text-[#1C1917]">{s.value}</p>
                 <div className="mt-1.5 h-1 bg-[#E7E5E4] rounded-full">

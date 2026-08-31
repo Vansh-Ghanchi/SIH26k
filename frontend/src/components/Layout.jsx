@@ -1,6 +1,5 @@
 import { useState } from "react";
 import Sidebar from "./Sidebar";
-import Header from "./Header";
 import GovtHeaderBanner from "./GovtHeaderBanner";
 
 export default function Layout({
@@ -14,15 +13,11 @@ export default function Layout({
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <div className="flex h-full bg-[#FAF7F4]">
+    <div className="flex h-full bg-[#FAF7F4] font-sans">
       <Sidebar user={user} mobileOpen={mobileOpen} onClose={() => setMobileOpen(false)} />
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
-        {/* Official Top Government Banner (Left: MoSPI Emblem, Right: PAIMANA Logo) */}
-        <GovtHeaderBanner />
-
-        {/* Standard Inner Header */}
-        <Header
-          user={user}
+        {/* Unified Official Single Master Header Banner */}
+        <GovtHeaderBanner
           title={title}
           subtitle={subtitle}
           onMenuClick={() => setMobileOpen(true)}

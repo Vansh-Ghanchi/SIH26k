@@ -2,7 +2,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, FolderOpen, Brain, Bell, BarChart3,
   Lightbulb, MessageSquare, FileText, LogOut, Shield, X,
-  ShieldCheck, CheckSquare
+  ShieldCheck, CheckSquare, Activity
 } from "lucide-react";
 
 export default function Sidebar({ user, mobileOpen, onClose }) {
@@ -14,29 +14,42 @@ export default function Sidebar({ user, mobileOpen, onClose }) {
     navigate("/login");
   };
 
-  // Determine dynamic role-based home dashboard link & label
-  const getRoleDashboard = () => {
+  // Strictly Role-Based Navigation Items
+  const getNavItems = () => {
+    // 1. Reviewer / Monitoring Officer (Audit & Verification Authority)
     if (user?.role === "Reviewer / Monitoring Officer") {
-      return { path: "/reviewer-dashboard", label: "Reviewer Centre", icon: CheckSquare };
+      return [
+        { path: "/reviewer-dashboard", label: "Reviewer Centre", icon: CheckSquare },
+        { path: "/projects", label: "Projects Repository", icon: FolderOpen },
+        { path: "/explainable-ai", label: "Explainable AI (XAI)", icon: Lightbulb },
+        { path: "/alerts", label: "Verification Alerts", icon: Bell },
+        { path: "/reports", label: "Audit Logs & Export", icon: FileText },
+      ];
     }
+
+    // 2. Project Administrator (System & Ingestion Authority)
     if (user?.role === "Project Administrator") {
-      return { path: "/admin-dashboard", label: "Admin Console", icon: ShieldCheck };
+      return [
+        { path: "/admin-dashboard", label: "Admin Console", icon: ShieldCheck },
+        { path: "/projects", label: "Project Registry", icon: FolderOpen },
+        { path: "/analytics", label: "Ingestion Analytics", icon: BarChart3 },
+        { path: "/reports", label: "System Logs & Reports", icon: FileText },
+      ];
     }
-    return { path: "/dashboard", label: "Overview & Actions", icon: LayoutDashboard };
+
+    // 3. Government Officer (Decision-Maker & Executive Authority)
+    return [
+      { path: "/dashboard", label: "Overview & Actions", icon: LayoutDashboard },
+      { path: "/projects", label: "Projects Repository", icon: FolderOpen },
+      { path: "/ai-prediction", label: "AI Prediction Engine", icon: Brain },
+      { path: "/alerts", label: "Early Warnings", icon: Bell },
+      { path: "/analytics", label: "Sector Analytics", icon: BarChart3 },
+      { path: "/ai-assistant", label: "MoSPI AI Copilot", icon: MessageSquare },
+      { path: "/reports", label: "Reports & Export", icon: FileText },
+    ];
   };
 
-  const dashboardItem = getRoleDashboard();
-
-  const navItems = [
-    dashboardItem,
-    { path: "/projects", label: "Projects Repository", icon: FolderOpen },
-    { path: "/ai-prediction", label: "AI Prediction Engine", icon: Brain },
-    { path: "/alerts", label: "Early Warnings", icon: Bell },
-    { path: "/analytics", label: "Sector Analytics", icon: BarChart3 },
-    { path: "/explainable-ai", label: "Explainable AI (XAI)", icon: Lightbulb },
-    { path: "/ai-assistant", label: "MoSPI AI Copilot", icon: MessageSquare },
-    { path: "/reports", label: "Reports & Export", icon: FileText },
-  ];
+  const navItems = getNavItems();
 
   return (
     <>
@@ -50,14 +63,24 @@ export default function Sidebar({ user, mobileOpen, onClose }) {
                 <Shield size={16} className="text-white" />
               </div>
               <div>
-                <p className="text-sm font-black text-[#1C1917] tracking-tight">PAIMANA AI</p>
+                <p className="text-sm font-black text-[#1C1917] tracking-tight">DRISHTI AI</p>
                 <p className="text-[9px] font-bold text-[#E8602A] uppercase tracking-wider">MoSPI · Central IPMD</p>
               </div>
             </div>
           </div>
 
+          {/* Role Indicator Banner inside Sidebar */}
+          <div className="px-3 pt-3">
+            <div className="px-3 py-1.5 rounded-xl bg-[#FAF7F4] border border-[#E7E5E4] flex items-center justify-between">
+              <span className="text-[10px] font-bold text-[#78716C] uppercase tracking-wider">Active Workspace</span>
+              <span className="text-[9px] font-bold px-2 py-0.5 rounded-md bg-[#FEF0E7] text-[#E8602A]">
+                {user?.role === "Reviewer / Monitoring Officer" ? "Reviewer" : user?.role === "Project Administrator" ? "Admin" : "Officer"}
+              </span>
+            </div>
+          </div>
+
           {/* Nav */}
-          <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+          <nav className="flex-1 px-3 py-3 space-y-0.5 overflow-y-auto">
             {navItems.map(({ path, label, icon: Icon }) => (
               <NavLink
                 key={path}
@@ -66,7 +89,7 @@ export default function Sidebar({ user, mobileOpen, onClose }) {
                 className={({ isActive }) =>
                   `flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-150 group
                   ${isActive
-                    ? "bg-[#FEF0E7] text-[#E8602A] shadow-2xs"
+                    ? "bg-[#FEF0E7] text-[#E8602A] shadow-2xs font-bold"
                     : "text-[#78716C] hover:bg-[#F5F5F4] hover:text-[#1C1917]"}`
                 }
               >

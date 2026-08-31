@@ -4,6 +4,15 @@ node_modules/
 .pnp
 .pnp.js
 
+# Python Cache & Virtual Environments
+__pycache__/
+*/__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+
 # Production & Build outputs
 dist/
 build/
@@ -29,11 +38,9 @@ backend/extractor/flash_reports/
 
 # Environment Variables & Secrets (NEVER COMMIT SENSITIVE KEYS)
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*
 *.env
+backend/.env
 
 # Cache & Temporary Files
 .cache/
