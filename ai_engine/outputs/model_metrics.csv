@@ -1,0 +1,9 @@
+target,model,n,pos_rate,accuracy,precision,recall,f1,roc_auc,pr_auc
+deadline_slip,logistic_regression (valid),5371,0.427,0.752,0.666,0.844,0.745,0.833,0.733
+deadline_slip,xgboost (valid),5371,0.427,0.808,0.75,0.828,0.787,0.881,0.818
+deadline_slip,xgboost (test),7590,0.272,0.75,0.527,0.784,0.63,0.826,0.61
+deadline_slip,xgboost top-100 precision (test),100,,,0.82,,,,
+cost_escalation,logistic_regression (valid),5371,0.038,0.829,0.169,0.867,0.283,0.93,0.505
+cost_escalation,xgboost (valid),5371,0.038,0.986,0.843,0.793,0.817,0.977,0.869
+cost_escalation,xgboost (test),7590,0.045,0.977,0.746,0.74,0.743,0.966,0.813
+cost_escalation,xgboost top-100 precision (test),100,,,0.93,,,,

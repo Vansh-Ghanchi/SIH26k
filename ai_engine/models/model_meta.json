@@ -1,13 +1,20 @@
 {
-  "trained_samples": 18213,
+  "engine_version": "2.0-honest-time-split",
+  "trained_samples": 6563,
+  "split": {
+    "method": "time-aware (no future information in training)",
+    "train": "months <= 2026-01",
+    "validation": "months 2026-01..2026-03",
+    "test": "months > 2026-03"
+  },
   "feature_columns": [
     "log_original_cost",
     "multi_state",
     "agency_freq",
     "sector_freq",
     "ministry_freq",
-    "approval_to_start_months",
     "approval_year",
+    "approval_to_start_months",
     "planned_duration_months",
     "age_at_t_months",
     "cost_overrun_so_far_pct",
@@ -21,34 +28,108 @@
     "months_to_revised_doc",
     "spend_vs_progress",
     "exp_per_pct",
+    "cost_revisions_so_far",
     "progress_rate_3m",
     "spend_rate_3m",
     "cost_change_3m",
     "progress_stall",
-    "doc_push_recent",
-    "cost_revisions_so_far"
+    "doc_push_recent"
   ],
+  "n_features": 26,
+  "high_risk_method": "derived: p_high = 1 - (1-p_deadline_slip)*(1-p_cost_escalation)",
+  "risk_score_method": "100 * (0.5*p_deadline_slip + 0.5*p_cost_escalation); LOW<30<=MEDIUM<60<=HIGH (matches latest_risk_scores.csv)",
   "metrics": {
-    "high_risk": {
-      "accuracy": 0.8572604995882515,
-      "precision": 0.771505376344086,
-      "recall": 0.6212121212121212,
-      "f1": 0.6882494004796164,
-      "roc_auc": 0.9108012558729734
-    },
     "deadline_slip": {
-      "accuracy": 0.856162503431238,
-      "precision": 0.7547945205479452,
-      "recall": 0.6149553571428571,
-      "f1": 0.6777367773677737,
-      "roc_auc": 0.909681096910916
+      "rule_based_valid": {
+        "accuracy": 0.547,
+        "precision": 0.469,
+        "recall": 0.429,
+        "f1": 0.448,
+        "roc_auc": 0.55,
+        "pr_auc": 0.437
+      },
+      "logistic_regression_valid": {
+        "accuracy": 0.752,
+        "precision": 0.666,
+        "recall": 0.844,
+        "f1": 0.745,
+        "roc_auc": 0.833,
+        "pr_auc": 0.733
+      },
+      "xgboost_valid": {
+        "accuracy": 0.808,
+        "precision": 0.75,
+        "recall": 0.828,
+        "f1": 0.787,
+        "roc_auc": 0.881,
+        "pr_auc": 0.818,
+        "top100_precision": 0.93
+      },
+      "xgboost_test": {
+        "accuracy": 0.75,
+        "precision": 0.527,
+        "recall": 0.784,
+        "f1": 0.63,
+        "roc_auc": 0.826,
+        "pr_auc": 0.61,
+        "top100_precision": 0.82
+      },
+      "top_features": [
+        "time_overrun_months",
+        "agency_freq",
+        "progress_stall",
+        "months_to_revised_doc",
+        "sector_freq",
+        "cost_revisions_so_far",
+        "ministry_freq",
+        "cost_change_3m"
+      ]
     },
     "cost_escalation": {
-      "accuracy": 0.9854515509195718,
-      "precision": 0.9054054054054054,
-      "recall": 0.5929203539823009,
-      "f1": 0.7165775401069518,
-      "roc_auc": 0.9852590939858106
+      "rule_based_valid": {
+        "accuracy": 0.587,
+        "precision": 0.023,
+        "recall": 0.23,
+        "f1": 0.042,
+        "roc_auc": 0.387,
+        "pr_auc": 0.029
+      },
+      "logistic_regression_valid": {
+        "accuracy": 0.829,
+        "precision": 0.169,
+        "recall": 0.867,
+        "f1": 0.283,
+        "roc_auc": 0.93,
+        "pr_auc": 0.505
+      },
+      "xgboost_valid": {
+        "accuracy": 0.986,
+        "precision": 0.843,
+        "recall": 0.793,
+        "f1": 0.817,
+        "roc_auc": 0.977,
+        "pr_auc": 0.869,
+        "top100_precision": 0.93
+      },
+      "xgboost_test": {
+        "accuracy": 0.977,
+        "precision": 0.746,
+        "recall": 0.74,
+        "f1": 0.743,
+        "roc_auc": 0.966,
+        "pr_auc": 0.813,
+        "top100_precision": 0.93
+      },
+      "top_features": [
+        "cost_revisions_so_far",
+        "cost_already_revised",
+        "cost_overrun_so_far_pct",
+        "ministry_freq",
+        "agency_freq",
+        "spend_rate_3m",
+        "progress_stall",
+        "sector_freq"
+      ]
     }
   }
 }

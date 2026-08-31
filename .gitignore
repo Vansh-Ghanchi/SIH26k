@@ -63,3 +63,6 @@ Thumbs.db
 .vscode/*
 !.vscode/extensions.json
 !.vscode/settings.json
+
+# Quarantined old leaky engine (reference only, never run)
+ai_engine/_legacy_leaky/
